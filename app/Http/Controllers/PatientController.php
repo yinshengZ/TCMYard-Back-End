@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -24,8 +25,8 @@ class PatientController extends Controller
             ->symptoms()->allergies()->diseases()->get();
 
         return response()->json([
-            'data'=>$patients,
-            'code'=>200
+            'data' => $patients,
+            'code' => 200
         ]);
     }
 
@@ -34,8 +35,8 @@ class PatientController extends Controller
         $patients = Patient::whereMonth('created_at', Carbon::now()->month)->with('gender')->get();
 
         return response()->json([
-            'data'=>$patients,
-            'code'=>200
+            'data' => $patients,
+            'code' => 200
         ]);
     }
 
@@ -74,6 +75,8 @@ class PatientController extends Controller
             'current_medication' => 'array|nullable',
             'symptoms' => 'array|nullable',
             'diseases' => 'array|nullable',
+
+
         ));
 
         $patient = new Patient;
@@ -81,7 +84,11 @@ class PatientController extends Controller
         $patient->last_name = $request->last_name;
         $patient->gender_id = $request->gender_id;
         $patient->date_of_birth = $request->date_of_birth;
-        $patient->date_joined = $request->date_joined;
+        if (!empty($request->date_joined)) {
+            $patient->date_joined = $request->date_joined;
+        } else {
+            $patient->date_joined = Carbon::today();
+        }
         $patient->postcode = $request->postcode;
         $patient->telephone = $request->telephone;
         $patient->email = $request->email;
@@ -90,6 +97,7 @@ class PatientController extends Controller
         $patient->hiv_status = $request->hiv;
         $patient->past_history = $request->past_history;
         $patient->current_issue = $request->current_issue;
+
 
         $patient->save();
 
@@ -118,8 +126,8 @@ class PatientController extends Controller
         $patients['medications'] = $patients->medications;
         $patients['symptoms'] = $patients->symptoms;
         return response()->json([
-            'data'=>$patients,
-            'code'=>200
+            'data' => $patients,
+            'code' => 200
 
         ]);
     }
@@ -128,8 +136,8 @@ class PatientController extends Controller
     {
         $patients = Patient::with('gender')->with('marital_status')->find($id);
         return response()->json([
-            'data'=> $patients,
-            'code'=>200
+            'data' => $patients,
+            'code' => 200
         ]);
     }
 
@@ -154,8 +162,8 @@ class PatientController extends Controller
         $patient->email = $request->email;
         $patient->marital_status_id = $request->marital_status_id;
         $patient->occupation = $request->occupation;
-        if($request->hiv_status==0){
-            $patient->hiv_status=0;
+        if ($request->hiv_status == 0) {
+            $patient->hiv_status = 0;
         }
         $patient->date_of_birth = $request->date_of_birth;
         $patient->current_issue = $request->current_issue;
@@ -173,7 +181,7 @@ class PatientController extends Controller
 
         return response()->json([
             'data' => 'Patient has been updated!',
-            'code'=>200
+            'code' => 200
         ]);
     }
 
@@ -207,8 +215,8 @@ class PatientController extends Controller
 
         $input = $query->input;
         $option = $query->option;
-        $id=0;
-        $patients=[];
+        $id = 0;
+        $patients = [];
         if ($option == "name") {
             $id = Patient::where('first_name', "LIKE", "%{$input}%")
                 ->orWhere('last_name', "Like", "%{$input}%")
@@ -225,15 +233,15 @@ class PatientController extends Controller
             $data = Allergy::where('allergies', 'LIKE', "%{$input}%")->with('patients')->get();
             $id = $data->pluck('patients')->collapse()->pluck('id');
         } else if ($option == "date") {
-            
+
             $id = Patient::whereDate('created_at', Carbon::parse($input))->get()->pluck('id');
         }
 
         $patients = Patient::whereIn('id', $id)->with('gender')->with('marital_status')->orderBy('first_name')->get();
 
         return response()->json([
-            'data'=>$patients,
-            'code'=>200
+            'data' => $patients,
+            'code' => 200
         ]);
 
         //return $patients;
@@ -247,7 +255,7 @@ class PatientController extends Controller
 
         return response()->json([
             'data' => 'Patient disease has been added!',
-            'code'=>200
+            'code' => 200
         ]);
     }
 
@@ -259,7 +267,7 @@ class PatientController extends Controller
 
         return response()->json([
             'data' => 'Patient allergy has been added!',
-            'code'=>200
+            'code' => 200
         ]);
     }
 
@@ -270,7 +278,7 @@ class PatientController extends Controller
 
         return response()->json([
             'data' => 'Patient symptom has been added!',
-            'code'=>200
+            'code' => 200
         ]);
     }
 
@@ -281,7 +289,7 @@ class PatientController extends Controller
 
         return response()->json([
             'data' => 'Patient medication has been added!',
-            'code'=>200
+            'code' => 200
         ]);
     }
 
@@ -293,7 +301,7 @@ class PatientController extends Controller
 
         return response()->json([
             'data' => 'Patient disease has been deleted!',
-            'code'=>200
+            'code' => 200
 
         ]);
     }
@@ -308,7 +316,7 @@ class PatientController extends Controller
 
         return response()->json([
             'data' => 'Patient symptom has been deleted!',
-            'code'=>200
+            'code' => 200
         ]);
     }
 
@@ -319,7 +327,7 @@ class PatientController extends Controller
 
         return response()->json([
             'data' => 'Patient medication has been deleted!',
-            'code'=>200
+            'code' => 200
         ]);
     }
 
@@ -330,7 +338,7 @@ class PatientController extends Controller
 
         return response()->json([
             'data' => 'Patient allergy has been deleted!',
-            'code'=>200
+            'code' => 200
         ]);
     }
 }
