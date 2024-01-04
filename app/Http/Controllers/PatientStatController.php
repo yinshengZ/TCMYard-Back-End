@@ -33,32 +33,39 @@ class PatientStatController extends Controller
             ->whereBetween('date_joined', [Carbon::now()->startOfYear(), Carbon::now()])
             ->groupBy(DB::raw('date'))
             ->orderBy('date', 'ASC')->get();
-        $months = Ultilities::getAllMonths('short');
-        $current_month = Carbon::now()->month;
-        //index start from 1 as its used to compare month value of 1, <= used to loop 12 times for 12 months
-        for ($i = 1; $i <= (int)$current_month; $i++) {
+        if ($patients->count() > 0) {
+            $months = Ultilities::getAllMonths('short');
+            $current_month = Carbon::now()->month;
+            //index start from 1 as its used to compare month value of 1, <= used to loop 12 times for 12 months
+            for ($i = 1; $i <= (int)$current_month; $i++) {
 
-            if ($patients[$counter]['date'] != $i) {
-                //$i - 1 to get the actual index for data arrays
-                $data[$i - 1]['count'] = 0;
-                $data[$i - 1]['date'] = $months[$i - 1];
-            } else {
+                if ($patients[$counter]['date'] != $i) {
+                    //$i - 1 to get the actual index for data arrays
+                    $data[$i - 1]['count'] = 0;
+                    $data[$i - 1]['date'] = $months[$i - 1];
+                } else {
 
-                $data[$i - 1]['count'] = $patients[$counter]['count'];
-                $data[$i - 1]['date'] = $months[$i - 1];
+                    $data[$i - 1]['count'] = $patients[$counter]['count'];
+                    $data[$i - 1]['date'] = $months[$i - 1];
 
-                // increment to maximum the size of the $patients data.
-                if ($counter <= sizeof($patients)) {
-                    $counter++;
+                    // increment to maximum the size of the $patients data.
+                    if ($counter <= sizeof($patients)) {
+                        $counter++;
+                    }
                 }
             }
+
+
+            return response()->json([
+                'data' => $data,
+                'code' => 200
+            ]);
+        } else {
+            return response()->json([
+                'data' => "No new patients yet!",
+                'code' => 200
+            ]);
         }
-
-
-        return response()->json([
-            'data' => $data,
-            'code' => 200
-        ]);
     }
 
     public function get_most_patients_gender()
