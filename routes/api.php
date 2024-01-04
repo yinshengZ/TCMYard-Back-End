@@ -24,14 +24,15 @@ use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\MedicationController;
 use App\Http\Controllers\DiseaseController;
 use App\Http\Controllers\PaymentMethodController;
+use App\Http\Controllers\InventoryStatController;
 
 
 
 Route::group([
-    'middleware'=>['auth:sanctum'],
-],function(){
-    Route::get('/logout',[UserController::class,'logout']);
-    Route::get('/user/info',[UserController::class,'get_user_info']);
+    'middleware' => ['auth:sanctum'],
+], function () {
+    Route::get('/logout', [UserController::class, 'logout']);
+    Route::get('/user/info', [UserController::class, 'get_user_info']);
 
     Route::post('patient/disease/tag', [PatientController::class, 'add_patient_disease']);
     Route::post('patient/allergy/tag', [PatientController::class, 'add_patient_allergy']);
@@ -116,7 +117,7 @@ Route::group([
     Route::get('finance/income/distribution/week/{data}', [FinanceController::class, 'get_week_income_distributions']);
 
     Route::get('finance/income/comp/all_time', [FinanceController::class, 'get_all_time_comp_percentages']);
-    Route::get('finance/income/comp/all_time_count',[FinanceController::class,'get_all_time_count_percentages']);
+    Route::get('finance/income/comp/all_time_count', [FinanceController::class, 'get_all_time_count_percentages']);
 
     Route::get('finance/income/record/day', [FinanceController::class, 'get_highest_daily_income']);
     Route::get('finance/income/record/week', [FinanceController::class, 'get_highest_weekly_income']);
@@ -134,6 +135,7 @@ Route::group([
 
 
 
+    Route::get('inventory/expirying', [InventoryStatController::class, 'get_expirying_inventories']);
 
 
     Route::resource('patient', PatientController::class);
@@ -153,5 +155,4 @@ Route::group([
 });
 
 
-Route::post('/login',[UserController::class,'login']);
-
+Route::post('/login', [UserController::class, 'login']);
