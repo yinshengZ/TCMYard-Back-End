@@ -75,4 +75,17 @@ class InventoryStatController extends Controller
             'code' => 200
         ]);
     }
+
+    public function lowest_stocks()
+    {
+        $inventory = Inventory::select('id', 'name', 'stock')
+            ->orderBy('stock', 'asc')
+            ->take(10)
+            ->get();
+
+        return response()->json([
+            'data' => $inventory,
+            'code' => 200
+        ]);
+    }
 }
