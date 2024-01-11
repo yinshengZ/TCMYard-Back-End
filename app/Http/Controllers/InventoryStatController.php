@@ -88,4 +88,10 @@ class InventoryStatController extends Controller
             'code' => 200
         ]);
     }
+
+    public function most_profitabe()
+    {
+        //TODO:
+
+    }
 }

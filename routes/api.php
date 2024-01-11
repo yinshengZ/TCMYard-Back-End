@@ -55,6 +55,7 @@ Route::group([
     Route::get('patient/stat/average_spending', [PatientStatController::class, 'get_patient_average_spending']);
     Route::get('patient/stat/locale', [PatientStatController::class, 'get_most_patients_locale']);
     Route::get('patient/stat/patient/current_year', [PatientStatController::class, 'get_current_year_monthly_patients']);
+    Route::get('patient/stat/most_profitable', [PatientStatController::class, 'get_most_profitable_patients']);
 
     Route::get('inventory/category/{category_id}', [InventoryController::class, 'get_inventory_by_category']);
     Route::get('inventory/retail', [InventoryController::class, 'get_retails']);

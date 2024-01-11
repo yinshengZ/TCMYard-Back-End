@@ -22,6 +22,19 @@ class PatientStatController extends Controller
         ]);
     }
 
+    public function get_most_profitable_patients()
+    {
+        $patient = Income::select('amount', 'patient_id', DB::raw('SUM(amount) as patient_spending'))
+            ->groupBy('patient_id')
+            ->orderBy('patient_spending', 'desc')
+            ->take(10)
+            ->with('patient')
+            ->get();
+        return response()->json([
+            'data' => $patient,
+            'code' => 200
+        ]);
+    }
 
 
     public function get_current_year_monthly_patients()
