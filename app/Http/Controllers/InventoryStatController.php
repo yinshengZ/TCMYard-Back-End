@@ -70,6 +70,9 @@ class InventoryStatController extends Controller
         foreach ($inventory as $index => $item) {
             $inventory[$index]->inventory_info = $inventory_info[$index];
         }
-        return $inventory;
+        return response()->json([
+            'data' => $inventory,
+            'code' => 200
+        ]);
     }
 }
