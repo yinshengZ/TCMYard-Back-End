@@ -137,6 +137,7 @@ Route::group([
 
     Route::get('inventory/expirying', [InventoryStatController::class, 'get_expirying_inventories']);
     Route::get('inventory/most_used', [InventoryStatController::class, 'most_used_inventories']);
+    Route::get('inventory/most_quantity', [InventoryStatController::class, 'most_quantity_used']);
 
     Route::resource('patient', PatientController::class);
     Route::apiResource('gender', GenderController::class);

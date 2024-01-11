@@ -52,4 +52,24 @@ class InventoryStatController extends Controller
             'code' => 200
         ]);
     }
+
+
+    public function most_quantity_used()
+    {
+        $inventory = DB::table('inventory_treatment')
+            ->select(DB::raw('inventory_id, SUM(units) as quantity'))
+            ->groupBy('inventory_id')
+            ->orderby('quantity', 'desc')
+            ->take(10)
+            ->get();
+
+        foreach ($inventory as $index => $item) {
+            $inventory_info[$index] = Inventory::select('id', 'name')->where('id', '=', $item->inventory_id)->get();
+        }
+
+        foreach ($inventory as $index => $item) {
+            $inventory[$index]->inventory_info = $inventory_info[$index];
+        }
+        return $inventory;
+    }
 }
