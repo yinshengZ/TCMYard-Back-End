@@ -22,6 +22,16 @@ class PatientStatController extends Controller
         ]);
     }
 
+    public function get_newest_patients()
+    {
+        $patient = Patient::orderBy('date_joined', 'desc')->take(10)->get();
+
+        return response()->json([
+            'data' => $patient,
+            'code' => 200
+        ]);
+    }
+
     public function get_most_profitable_patients()
     {
         $patient = Income::select('amount', 'patient_id', DB::raw('SUM(amount) as patient_spending'))
@@ -46,11 +56,12 @@ class PatientStatController extends Controller
             ->whereBetween('date_joined', [Carbon::now()->startOfYear(), Carbon::now()])
             ->groupBy(DB::raw('date'))
             ->orderBy('date', 'ASC')->get();
+        //return $patients;
         if ($patients->count() > 0) {
             $months = Ultilities::getAllMonths('short');
             $current_month = Carbon::now()->month;
             //index start from 1 as its used to compare month value of 1, <= used to loop 12 times for 12 months
-            for ($i = 1; $i <= (int)$current_month; $i++) {
+            for ($i = 1; $i < (int)$current_month; $i++) {
 
                 if ($patients[$counter]['date'] != $i) {
                     //$i - 1 to get the actual index for data arrays
