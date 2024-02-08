@@ -19,10 +19,10 @@ class CreateFilesTable extends Migration
             $table->string('file_path');
             $table->string('file_type');
             $table->string('original_name');
-            $table->text('description');
+            $table->text('description')->nullable();
             $table->unsignedBigInteger('patient_id');
             $table->unsignedBigInteger('user_id');
-           
+
 
             $table->timestamps();
         });
