@@ -25,24 +25,27 @@ class InventoryStatController extends Controller
         ]);
     }
 
-    public function most_used_inventories()
-    {
 
+    public function most_used_inventories($quantity, $year)
+    {
         $inventory = DB::table('inventory_treatment')
             ->select(DB::raw('inventory_id, COUNT(inventory_id) as counts'))
+            ->whereYear('updated_at', $year)
             ->groupBy('inventory_id')
             ->orderBy('counts', 'desc')
-            ->take(10)
+            ->take($quantity)
             ->get();
 
         foreach ($inventory as $index => $item) {
             $inventory_info[$index] = Inventory::select('id', 'name')->where('id', '=', $item->inventory_id)->get();
             /*             $inventory[$index]->put('inventory_info', $inventory_info);
  */
+            $monthly_usage[$index] = $this->get_inventory_usage_counts($item->inventory_id, $year);
         }
 
         foreach ($inventory as $index => $item) {
             $inventory[$index]->inventory_info = $inventory_info[$index];
+            $inventory[$index]->monthly_usage = $monthly_usage[$index];
         }
 
 
@@ -89,9 +92,66 @@ class InventoryStatController extends Controller
                 array_push($final_data, $temp_data);
             }
         }
+        return $final_data;
 
-        return response()->json([
+        /* return response()->json([
             'data' => $final_data,
+            'code' => 200
+        ]); */
+    }
+
+    public function get_all_inventory_recorded_years()
+    {
+        $years = DB::table('inventory_treatment')
+            ->select(DB::raw('inventory_id, Year(updated_at) as year'))
+            ->groupBy('year')
+            ->orderBy('year', 'ASC')
+            ->get();
+        return response()->json([
+            'data' => $years,
+            'code' => 200
+        ]);
+    }
+
+    public function get_inventory_used_years($id)
+    {
+        $years  = DB::table('inventory_treatment')
+            ->select(DB::raw('inventory_id, Year(updated_at) as year'))
+            ->where('inventory_id', '=', $id)
+            ->groupBy('year')
+            ->get();
+        return response()->json([
+            'data' => $years,
+            'code' => 200
+        ]);
+    }
+
+    /**
+     * @year get records by year 
+     * @quantity get the quantity of records
+     */
+
+    public function most_quantity_used($quantity, $year)
+    {
+        $inventory = DB::table('inventory_treatment')
+            ->select(DB::raw('inventory_id, SUM(units) as quantity'))
+            ->whereYear('updated_at', $year)
+            ->groupBy('inventory_id')
+            ->orderby('quantity', 'desc')
+            ->take($quantity)
+            ->get();
+
+        foreach ($inventory as $index => $item) {
+            $inventory_info[$index] = Inventory::select('id', 'name')->where('id', '=', $item->inventory_id)->get();
+            $monthly_usage[$index] = $this->get_inventory_usage_units($item->inventory_id, $year);
+        }
+
+        foreach ($inventory as $index => $item) {
+            $inventory[$index]->inventory_info = $inventory_info[$index];
+            $inventory[$index]->monthly_usage = $monthly_usage[$index];
+        }
+        return response()->json([
+            'data' => $inventory,
             'code' => 200
         ]);
     }
@@ -99,12 +159,13 @@ class InventoryStatController extends Controller
     public function get_inventory_usage_units($id, $year)
     {
         $inventory_units = DB::table('inventory_treatment')
-            ->select(DB::raw('inventory_id,SUM(units) as units, Month(updated_at) as month'))
+            ->select(DB::raw('inventory_id,SUM(units) as units, Month(updated_at) as month, Year(updated_at) as year'))
             ->where('inventory_id', '=', $id)
             ->whereYear('updated_at', $year)
             ->groupBy('month')
             ->orderBy('month', 'ASC')
             ->get();
+
         $months_num = Ultilities::getAllMonths('num');
         $final_data = [];
 
@@ -129,34 +190,15 @@ class InventoryStatController extends Controller
             }
         }
 
-        return response()->json([
+        return $final_data;
+        /*  return response()->json([
             'data' => $final_data,
             'code' => 200
-        ]);
+        ]); */
     }
 
 
-    public function most_quantity_used()
-    {
-        $inventory = DB::table('inventory_treatment')
-            ->select(DB::raw('inventory_id, SUM(units) as quantity'))
-            ->groupBy('inventory_id')
-            ->orderby('quantity', 'desc')
-            ->take(10)
-            ->get();
 
-        foreach ($inventory as $index => $item) {
-            $inventory_info[$index] = Inventory::select('id', 'name')->where('id', '=', $item->inventory_id)->get();
-        }
-
-        foreach ($inventory as $index => $item) {
-            $inventory[$index]->inventory_info = $inventory_info[$index];
-        }
-        return response()->json([
-            'data' => $inventory,
-            'code' => 200
-        ]);
-    }
 
     public function lowest_stocks()
     {
