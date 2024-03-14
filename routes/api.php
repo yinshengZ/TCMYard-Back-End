@@ -83,6 +83,9 @@ Route::group([
 
 
     Route::get('finance/income', [FinanceController::class, 'get_all_incomes']);
+    Route::get('finance/income/years', [FinanceController::class, 'get_income_years']);
+    Route::get('finance/income/year/{year}', [FinanceController::class, 'get_income_by_year']);
+    Route::get('finance/income/id/{id}', [FinanceController::class, 'get_income_by_id']);
     Route::get('finance/income/patient/{id}', [FinanceController::class, 'get_patient_incomes']);
     Route::post('finance/income/patient', [FinanceController::class, 'add_patient_income']);
     Route::put('finance/income/patient', [FinanceController::class, 'update_patient_income']);

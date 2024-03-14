@@ -1,9 +1,11 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Http\Controllers\Controller;
 
 use App\Models\Income;
+use App\Models\Patient;
 
 use App\Services\FinanceService;
 use App\Services\Ultilities;
@@ -19,6 +21,45 @@ use DB;
 class FinanceController extends Controller
 {
 
+   public function get_income_years()
+   {
+      $years = Income::select(DB::raw('Year(date) as year'))
+         ->groupBy('year')
+         ->orderBy('year', 'DESC')
+         ->get();
+      return response()->json([
+         'data' => $years,
+         'code' => 200,
+      ]);
+   }
+
+   public function get_income_by_year($year)
+   {
+      $incomes = Income::whereYear('date', $year)
+         ->with('payment_method')
+         ->with('service')
+         ->orderBy('date', 'DESC')
+         ->get();
+      return response()->json([
+         'data' => $incomes,
+         'code' => 200
+      ]);
+   }
+
+   public function get_income_by_id($id)
+   {
+      $income = Income::where('id', $id)
+         ->with('patient')
+         ->with('payment_method')
+         ->with('service')
+         ->with('user')
+         ->get();
+
+      return response()->json([
+         'data' => $income,
+         'code' => 200
+      ]);
+   }
 
    public function add_patient_income(Request $request)
    {
@@ -29,8 +70,8 @@ class FinanceController extends Controller
    {
       $incomes = Income::select('amount')->whereYear('date', date('Y'))->sum('amount');
       return response()->json([
-         'data'=>$incomes,
-         'code'=>200
+         'data' => $incomes,
+         'code' => 200
       ]);
    }
 
@@ -38,8 +79,8 @@ class FinanceController extends Controller
    {
       $incomes = Income::select('amount')->whereYear('date', Carbon::now()->year)->whereMonth('date', Carbon::now()->month)->sum('amount');
       return response()->json([
-         'data'=>$incomes,
-         'code'=>200
+         'data' => $incomes,
+         'code' => 200
       ]);
    }
 
@@ -47,8 +88,8 @@ class FinanceController extends Controller
    {
       $incomes = Income::select('amount')->whereBetween('date', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])->sum('amount');
       return response()->json([
-         'data'=>$incomes,
-         'code'=>200
+         'data' => $incomes,
+         'code' => 200
       ]);
    }
 
@@ -56,8 +97,8 @@ class FinanceController extends Controller
    {
       $incomes = Income::select('amount')->whereDate('date', Carbon::today())->sum('amount');
       return response()->json([
-         'data'=>$incomes,
-         'code'=>200
+         'data' => $incomes,
+         'code' => 200
       ]);
    }
 
@@ -66,10 +107,10 @@ class FinanceController extends Controller
       $incomes = Income::select('amount')
          ->whereDate('date', Carbon::today())
          ->get();
-         return response()->json([
-            'data'=>$incomes,
-            'code'=>200
-         ]);
+      return response()->json([
+         'data' => $incomes,
+         'code' => 200
+      ]);
    }
 
    public function get_current_day_daily_income_distribution()
@@ -80,10 +121,10 @@ class FinanceController extends Controller
          ->orderBy('amount', 'DESC')
          ->with('service')
          ->get();
-         return response()->json([
-            'data'=>$incomes,
-            'code'=>200
-         ]);
+      return response()->json([
+         'data' => $incomes,
+         'code' => 200
+      ]);
    }
 
    public function get_yearly_incomes()
@@ -112,11 +153,10 @@ class FinanceController extends Controller
          ->groupBy('date')
          ->orderBy('date', 'ASC')->get();
 
-         return response()->json([
-            'data'=>$incomes,
-            'code'=>200
-         ]);
-      
+      return response()->json([
+         'data' => $incomes,
+         'code' => 200
+      ]);
    }
 
    public function get_current_week_daily_incomes()
@@ -126,8 +166,8 @@ class FinanceController extends Controller
          ->groupBy('date')
          ->orderBy('date', 'ASC')->get();
       return response()->json([
-         'data'=>$incomes,
-         'code'=>200
+         'data' => $incomes,
+         'code' => 200
       ]);
    }
 
@@ -139,8 +179,8 @@ class FinanceController extends Controller
          ->groupBy(DB::raw('MONTH(date)'))
          ->orderBy('date', 'ASC')->get();
       return response()->json([
-         'data'=>$incomes,
-         'code'=>200
+         'data' => $incomes,
+         'code' => 200
       ]);
    }
 
@@ -157,8 +197,8 @@ class FinanceController extends Controller
          ->get();
 
       return response()->json([
-         'data'=>$incomes,
-         'code'=>200
+         'data' => $incomes,
+         'code' => 200
       ]);
    }
 
@@ -172,8 +212,8 @@ class FinanceController extends Controller
          ->get();
 
       return response()->json([
-         'data'=>$incomes,
-         'code'=>200
+         'data' => $incomes,
+         'code' => 200
       ]);
    }
 
@@ -186,8 +226,8 @@ class FinanceController extends Controller
          ->with('service')
          ->get();
       return response()->json([
-         'data'=>$incomes,
-         'code'=>200
+         'data' => $incomes,
+         'code' => 200
       ]);
    }
 
@@ -201,8 +241,8 @@ class FinanceController extends Controller
          ->get();
 
       return response()->json([
-         'data'=>$incomes,
-         'code'=>200
+         'data' => $incomes,
+         'code' => 200
       ]);
    }
 
@@ -219,8 +259,8 @@ class FinanceController extends Controller
          ->get();
 
       return response()->json([
-         'data'=>$incomes,
-         'code'=>200
+         'data' => $incomes,
+         'code' => 200
       ]);
    }
 
@@ -233,8 +273,8 @@ class FinanceController extends Controller
          ->get();
 
       return response()->json([
-         'data'=>$incomes,
-         'code'=>200
+         'data' => $incomes,
+         'code' => 200
       ]);
    }
 
@@ -250,8 +290,8 @@ class FinanceController extends Controller
          ->whereYear('date', '=', $data)
          ->get();
       return response()->json([
-         'data'=>$incomes,
-         'code'=>200
+         'data' => $incomes,
+         'code' => 200
       ]);
    }
 
@@ -275,10 +315,10 @@ class FinanceController extends Controller
          ->get();
 
 
-         return response()->json([
-            'data'=>$income,
-            'code'=>200
-         ]);
+      return response()->json([
+         'data' => $income,
+         'code' => 200
+      ]);
 
 
 
@@ -299,21 +339,22 @@ class FinanceController extends Controller
          ->with('service')
          ->get();
       return response()->json([
-         'data'=>$incomes,
-         'code'=>200
+         'data' => $incomes,
+         'code' => 200
       ]);
    }
-/**
- * get the number of each services been sold
- */
-   public function get_all_time_count_percentages(){
-      $incomes = Income::select([DB::raw("COUNT(amount) as total_count"),'service_id'])
-      ->groupBy('service_id')
-      ->with('service')
-      ->get();
+   /**
+    * get the number of each services been sold
+    */
+   public function get_all_time_count_percentages()
+   {
+      $incomes = Income::select([DB::raw("COUNT(amount) as total_count"), 'service_id'])
+         ->groupBy('service_id')
+         ->with('service')
+         ->get();
       return response()->json([
-         'data'=>$incomes,
-         'code'=>200
+         'data' => $incomes,
+         'code' => 200
       ]);
    }
 
@@ -324,10 +365,10 @@ class FinanceController extends Controller
          ->orderBy('amount', 'DESC')
          ->first();
 
-         return response()->json([
-            'data'=>$income,
-            'code'=>200
-         ]);
+      return response()->json([
+         'data' => $income,
+         'code' => 200
+      ]);
    }
 
    public function get_highest_weekly_income()
@@ -336,10 +377,10 @@ class FinanceController extends Controller
          ->groupby('year', 'month', 'week')
          ->orderBy('amount', 'DESC')
          ->first();
-         return response()->json([
-            'data'=>$income,
-            'code'=>200
-         ]);
+      return response()->json([
+         'data' => $income,
+         'code' => 200
+      ]);
    }
 
    public function get_highest_monthly_income()
@@ -349,10 +390,10 @@ class FinanceController extends Controller
          ->orderBy('amount', 'DESC')
          ->first();
 
-         return response()->json([
-            'data'=>$income,
-            'code'=>200
-         ]);
+      return response()->json([
+         'data' => $income,
+         'code' => 200
+      ]);
    }
 
    public function get_highest_yearly_income()
@@ -361,10 +402,10 @@ class FinanceController extends Controller
          ->groupBy('year')
          ->orderBy('amount', 'DESC')
          ->first();
-         return response()->json([
-            'data'=>$income,
-            'code'=>200
-         ]);
+      return response()->json([
+         'data' => $income,
+         'code' => 200
+      ]);
    }
 
    public function get_highest_spender()
@@ -377,10 +418,10 @@ class FinanceController extends Controller
          ->orderBy('amount', 'DESC')
          ->with('patient')
          ->first();
-         return response()->json([
-            'data'=>$income,
-            'code'=>200
-         ]);
+      return response()->json([
+         'data' => $income,
+         'code' => 200
+      ]);
    }
 
 
@@ -399,8 +440,8 @@ class FinanceController extends Controller
       return $income; */
       $income = FinanceService::processIncomesData($id);
       return response()->json([
-         'data'=>$income,
-         'code'=>200
+         'data' => $income,
+         'code' => 200
       ]);
    }
 

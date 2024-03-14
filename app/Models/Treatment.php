@@ -22,7 +22,7 @@ class Treatment extends Model
 
     public function incomes()
     {
-        return $this->hasMany('App\Models\Income', 'treatment_id');
+        return $this->hasMany('App\Models\Income', 'id');
     }
 
     public function treatment_details()

@@ -105,7 +105,7 @@ class InventoryStatController extends Controller
         $years = DB::table('inventory_treatment')
             ->select(DB::raw('inventory_id, Year(updated_at) as year'))
             ->groupBy('year')
-            ->orderBy('year', 'ASC')
+            ->orderBy('year', 'DESC')
             ->get();
         return response()->json([
             'data' => $years,
@@ -118,6 +118,7 @@ class InventoryStatController extends Controller
         $years  = DB::table('inventory_treatment')
             ->select(DB::raw('inventory_id, Year(updated_at) as year'))
             ->where('inventory_id', '=', $id)
+            ->orderBy('year', 'DESC')
             ->groupBy('year')
             ->get();
         return response()->json([

@@ -17,7 +17,7 @@ class Income extends Model
 
     public function treatment()
     {
-        return $this->belongsTo('App\Models\Treatment', 'id');
+        return $this->belongsTo('App\Models\Treatment', 'treatment_id');
     }
 
     public function user()
