@@ -30,6 +30,15 @@ class PatientController extends Controller
         ]);
     }
 
+    public function get_simple_patient_list()
+    {
+        $patients = Patient::select('id', 'first_name', 'last_name','email')->orderBy('first_name', 'ASC')->get();
+        return response()->json([
+            'data' => $patients,
+            'code' => 200
+        ]);
+    }
+
     public function get_current_month_new_patients()
     {
         $patients = Patient::whereMonth('created_at', Carbon::now()->month)->with('gender')->get();

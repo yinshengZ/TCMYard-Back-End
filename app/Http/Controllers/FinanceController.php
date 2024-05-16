@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 
 use App\Models\Income;
+use App\Models\Expense;
 use App\Models\Patient;
 
 use App\Services\FinanceService;
@@ -13,6 +14,7 @@ use App\Services\Ultilities;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Validator;
 
 use DB;
 
@@ -38,6 +40,7 @@ class FinanceController extends Controller
       $incomes = Income::whereYear('date', $year)
          ->with('payment_method')
          ->with('service')
+         ->with('patient')
          ->orderBy('date', 'DESC')
          ->get();
       return response()->json([
@@ -322,9 +325,7 @@ class FinanceController extends Controller
 
 
 
-      /*    return gettype($year);
-      
-     $date->getDateFromWeek($year, $data); */
+
    }
 
 
@@ -455,14 +456,110 @@ class FinanceController extends Controller
       return $id;
    }
 
+   public function get_expense($id){
+      $expense = Expense::where('id',$id)
+      ->with('category')->with('patient')->with('payment_method')
+      ->get();
+      return response()->json([
+         'data'=>$expense,
+         'code'=>200
+      ]);
+   }
+
    public function add_expense(Request $request)
    {
-      return $request;
+      $validator = Validator::make($request->all(),[
+         'amount' =>'required|numeric',
+         'description'=>'required|string',
+         'payment_type'=>'required',
+         'expense_category'=>'required',
+         'patient_id'=>'required',
+         'date'=>'required|date'
+      ]);
+      
+      
+    
+
+    if($validator->fails()){
+        return response()->json([
+         'message'=>$validator->errors()->first(),
+         'code'=>403,
+        ]);
+      }
+
+      
+
+
+
+
+
+      $expense = new Expense;
+      $expense->amount = $request->amount;
+      $expense->description = $request->description;
+      $expense->payment_method_id = $request->payment_type;
+      $expense->expense_category_id = $request->expense_category;
+      $expense->patient_id = $request->patient_id;
+      $expense->date = $request->date;
+      $expense->save();
+
+      return response()->json([
+         'data'=>'Expense Has Been Added!',
+         'code'=>200
+      ]);
+
    }
+
+   public function update_expense(Request $request){
+      $expense = Expense::findOrFail($request->id);
+      $expense->amount = $request->amount;
+      $expense->description = $request->description;
+      $expense->date = $request->date;
+      $expense->expense_category_id = $request->expense_category_id;
+      $expense->payment_method_id = $request->payment_method_id;
+      $expense->patient_id = $request->patient_id;
+
+      
+      $expense->save();
+      return response()->json([
+         'data'=>'Expense Has Been Updated!',
+         'code'=>200
+      ]);
+   }
+
+   public function delete_expense($id)
+   {
+      $expense = Expense::findOrFail($id);
+      $expense->delete();
+      return response()->json([
+         'data'=>'Expense Has Been Deleted!',
+         'code'=>200
+      ]);
+   }
+
 
    public function get_all_expenses()
    {
       return null;
+   }
+
+   public function get_expense_by_year( $request){
+      
+      $expense = Expense::whereYear('date',$request)
+      ->with('category')->with('patient')->with('payment_method')
+      ->orderBy('date','DESC')
+      ->get();
+      return response()->json([
+         'data'=> $expense,
+         'code'=>200
+      ]);
+   }
+
+   public function get_expense_years(){
+      $years = Expense::select([DB::raw("Year(date) as year")])->groupBy('year')->orderBy('year')->get();
+      return response()->json([
+         'data'=>$years,
+         'code'=>200
+      ]);
    }
 
    public function get_user_expenses($id)
@@ -470,13 +567,7 @@ class FinanceController extends Controller
       return $id;
    }
 
-   public function update_expense(Request $request)
-   {
-      return $request;
-   }
 
-   public function delete_expense($id)
-   {
-      return $id;
-   }
+
+
 }

@@ -23,10 +23,11 @@ use App\Http\Controllers\FileController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\MedicationController;
 use App\Http\Controllers\DiseaseController;
+use App\Http\Controllers\ExpenseTypeController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\InventoryStatController;
-
-
+use App\Http\Controllers\ExpenseCategoryController;
+use App\Models\ExpenseCategory;
 
 Route::group([
     'middleware' => ['auth:sanctum'],
@@ -39,17 +40,22 @@ Route::group([
     Route::post('patient/symptom/tag', [PatientController::class, 'add_patient_symptom']);
     Route::post('patient/medication/tag', [PatientController::class, 'add_patient_medication']);
 
+
     Route::delete('patient/disease/{patient_id}/{disease_id}', [PatientController::class, 'delete_patient_disease']);
     Route::delete('patient/symptom/{patient_id}/{symptom_id}', [PatientController::class, 'delete_patient_symptom']);
     Route::delete('patient/medication/{patient_id}/{medication_id}', [PatientController::class, 'delete_patient_medication']);
     Route::delete('patient/allergy/{patient_id}/{allergy_id}', [PatientController::class, 'delete_patient_allergy']);
+
+    Route::get('patient/basic_list', [PatientController::class, 'get_simple_patient_list']);
 
     Route::get('patient/info/{patient_id}', [PatientController::class, 'get_patient_info']);
 
     Route::post('patient/search', [PatientController::class, 'search_patient'])->name('patient.search_patient');
     Route::get('record/search/{patient_id}', [RecordController::class, 'patient_records'])->name('record.patient_records');
 
+
     Route::get('patient/new/month', [PatientController::class, 'get_current_month_new_patients']);
+
 
     Route::get('patient/new/custom/{number}', [PatientStatController::class, 'get_custom_number_patients']);
     Route::get('patient/stat/gender', [PatientStatController::class, 'get_most_patients_gender']);
@@ -90,11 +96,7 @@ Route::group([
     Route::post('finance/income/patient', [FinanceController::class, 'add_patient_income']);
     Route::put('finance/income/patient', [FinanceController::class, 'update_patient_income']);
     Route::delete('finance/income/{id}', [FinanceController::class, 'delete_patient_income']);
-    Route::get('finance/expense', [FinanceController::class, 'get_all_expenses']);
-    Route::get('finance/expense/{id}', [FinanceController::class, 'get_user_expenses']);
-    Route::post('finance/expense', [FinanceController::class, 'add_expense']);
-    Route::put('finance/expense', [FinanceController::class, 'update_expense']);
-    Route::delete('finance/expense/{id}', [FinanceController::class, 'delete_expense']);
+
 
     Route::get('finance/income/year', [FinanceController::class, 'get_curret_year_incomes']);
     Route::get('finance/income/month', [FinanceController::class, 'get_current_month_incomes']);
@@ -131,7 +133,25 @@ Route::group([
     Route::get('finance/income/record/year', [FinanceController::class, 'get_highest_yearly_income']);
     Route::get('finance/income/record/spender', [FinanceController::class, 'get_highest_spender']);
 
+    Route::get('finance/expense/year/{year}',[FinanceController::class,'get_expense_by_year']);
+    Route::get('finance/expense/year',[FinanceController::class,'get_expense_years']);
+    Route::get('finance/expense/expense_categories', [ExpenseCategoryController::class, 'index']);
+    Route::post('finance/expense/expense_categories',[ExpenseCategoryController::class,'store']);
+
+    /*     Route::get('finance/expense/{id}', [FinanceController::class, 'get_user_expenses']);
+     */   Route::post('finance/expense', [FinanceController::class, 'add_expense']);
+     Route::get('finance/expense/{id}',[FinanceController::class,'get_expense']);
+        Route::put('finance/expense', [FinanceController::class, 'update_expense']);
+        Route::delete('finance/expense/{id}',[FinanceController::class,'delete_expense']);
+       // Route::delete('finance/expense/{id}', [FinanceController::class, 'delete_expense']);
+
+  
+
+
+
+
     Route::get('payment_methods', [PaymentMethodController::class, 'index']);
+    Route::post('payment_methods',[PaymentMethodController::class,'store']);
 
     Route::get('treatment/patient/{id}', [TreatmentController::class, 'getPatientTreatments']);
 

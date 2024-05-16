@@ -20,6 +20,9 @@ class DatabaseSeeder extends Seeder
             MaritalSeeder::class,
             Inventory_Categories_Seeder::class,
             PaymentTypeSeeder::class,
+            InventorySeeder::class,
+            IncomeSeeder::class,
+            ExpenseSeeder::class,
 
         ]);
     }

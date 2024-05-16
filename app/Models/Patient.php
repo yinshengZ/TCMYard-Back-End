@@ -62,4 +62,8 @@ class Patient extends Model
     {
         return $this->hasMany('App\Models\Treatment', 'patient_id');
     }
+
+    public function expenses(){
+        return $this->hasMany('App\Models\Expense','patient_id');
+    }
 }

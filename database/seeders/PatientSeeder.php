@@ -33,6 +33,6 @@ class PatientSeeder extends Seeder
             'date_joined' => Carbon::create('1991','04','20')
         ];
         Patient::create($data);
-        Patient::factory(10)->create();
+        Patient::factory(500)->create();
     }
 }

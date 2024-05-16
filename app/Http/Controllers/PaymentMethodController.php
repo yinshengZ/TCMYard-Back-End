@@ -18,4 +18,15 @@ class PaymentMethodController extends Controller
             'code'=>200
         ]);
     }
+
+    public function store(Request $request){
+        $payment_method = new PaymentMethod;
+        $payment_method->payment_type = $request->method;
+        $payment_method->save();
+
+       return  response()->json([
+        'data'=>'Payment Method Has Been Added!',
+        'code'=>200
+       ]);
+    }
 }

@@ -16,7 +16,11 @@ class CreateExpensesTable extends Migration
         Schema::create('expenses', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('amount');
-            $table->unsignedBigInteger('expense_type_id');
+            $table->text('description');
+            $table->date('date');
+            $table->unsignedBigInteger('expense_category_id');
+            $table->unsignedBigInteger('payment_method_id');
+            $table->unsignedBigInteger('patient_id');
             $table->softDeletes('deleted_at');
             $table->timestamps();
         });
