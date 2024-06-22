@@ -10,6 +10,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
 
 use App\Services\Ultilities;
+use stdClass;
 
 class PatientStatController extends Controller
 {
@@ -48,48 +49,51 @@ class PatientStatController extends Controller
 
 
     public function get_current_year_monthly_patients()
-    {
-        $data = [];
-        $counter = 0;
+    {    
 
         $patients = Patient::select([DB::raw("COUNT(id) as count"), DB::raw("MONTH(date_joined) as date"), 'first_name'])
             ->whereBetween('date_joined', [Carbon::now()->startOfYear(), Carbon::now()])
             ->groupBy(DB::raw('date'))
             ->orderBy('date', 'ASC')->get();
-        //return $patients;
-        if ($patients->count() > 0) {
+
+        if (count($patients) > 0) {
             $months = Ultilities::getAllMonths('short');
-            $current_month = Carbon::now()->month;
-            //index start from 1 as its used to compare month value of 1, <= used to loop 12 times for 12 months
-            for ($i = 1; $i < (int)$current_month; $i++) {
+            $num_months = Ultilities::getAllMonths('num');
+            $count = 0;
+            $date = 0;
+            $first_name = "Null";
+            $final_data = [];
+            $patients_data=$patients->shift();
 
-                if ($patients[$counter]['date'] != $i) {
-                    //$i - 1 to get the actual index for data arrays
-                    $data[$i - 1]['count'] = 0;
-                    $data[$i - 1]['date'] = $months[$i - 1];
-                } else {
-
-                    $data[$i - 1]['count'] = $patients[$counter]['count'];
-                    $data[$i - 1]['date'] = $months[$i - 1];
-
-                    // increment to maximum the size of the $patients data.
-                    if ($counter <= sizeof($patients)) {
-                        $counter++;
-                    }
-                }
+          for ($i = 0; $i<count($num_months); $i++){              
+              
+              
+            if($num_months[$i] == $patients_data->date){
+                    $patients_data->short_month = $months[$i];
+                    array_push($final_data, $patients_data);
+                    if($patients->count()>0){
+                        $patients_data = $patients->shift();
+                      }
+                    continue;
+                }  else{
+                    $date = (int)$num_months[$i];
+                    $month_data = new stdClass();
+                    $month_data->count=$count;
+                    $month_data->date=$date;
+                    $month_data->short_month = $months[$i];
+                    $month_data->first_name=$first_name;            
+                    array_push($final_data,$month_data);         
+    
+                   }
+                   
+              }              
+             
             }
-
-
             return response()->json([
-                'data' => $data,
-                'code' => 200
+                'data'=>$final_data,
+                'code'=>200
             ]);
-        } else {
-            return response()->json([
-                'data' => "No new patients yet!",
-                'code' => 200
-            ]);
-        }
+
     }
 
     public function get_most_patients_gender()
