@@ -20,6 +20,7 @@ class Treatment extends Model
         return $this->belongsToMany('App\Models\Inventory')->withPivot('units')->withTimestamps();
     }
 
+
     public function incomes()
     {
         return $this->hasMany('App\Models\Income', 'id');
@@ -28,5 +29,9 @@ class Treatment extends Model
     public function treatment_details()
     {
         return $this->hasMany('App\Models\TreatmentDetails', 'id');
+    }
+
+    public function patients(){
+        return $this->belongsTo('App\Models\Patient','patient_id');
     }
 }
