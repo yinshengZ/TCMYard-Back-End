@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Patient;
 use App\Models\Income;
+use App\Models\Treatment;
 use DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Carbon;
@@ -49,7 +50,7 @@ class PatientStatController extends Controller
 
 
     public function get_current_year_monthly_patients()
-    {    
+    {
 
         $patients = Patient::select([DB::raw("COUNT(id) as count"), DB::raw("MONTH(date_joined) as date"), 'first_name'])
             ->whereBetween('date_joined', [Carbon::now()->startOfYear(), Carbon::now()])
@@ -63,37 +64,39 @@ class PatientStatController extends Controller
             $date = 0;
             $first_name = "Null";
             $final_data = [];
-            $patients_data=$patients->shift();
+            $patients_data = $patients->shift();
 
-          for ($i = 0; $i<count($num_months); $i++){              
-              
-              
-            if($num_months[$i] == $patients_data->date){
+            for ($i = 0; $i < count($num_months); $i++) {
+
+
+                if ($num_months[$i] == $patients_data->date) {
                     $patients_data->short_month = $months[$i];
                     array_push($final_data, $patients_data);
-                    if($patients->count()>0){
+                    if ($patients->count() > 0) {
                         $patients_data = $patients->shift();
-                      }
+                    }
                     continue;
-                }  else{
+                } else {
                     $date = (int)$num_months[$i];
                     $month_data = new stdClass();
-                    $month_data->count=$count;
-                    $month_data->date=$date;
+                    $month_data->count = $count;
+                    $month_data->date = $date;
                     $month_data->short_month = $months[$i];
-                    $month_data->first_name=$first_name;            
-                    array_push($final_data,$month_data);         
-    
-                   }
-                   
-              }              
-             
+                    $month_data->first_name = $first_name;
+                    array_push($final_data, $month_data);
+                }
             }
-            return response()->json([
-                'data'=>$final_data,
-                'code'=>200
-            ]);
 
+            return response()->json([
+                'data' => $final_data,
+                'code' => 200
+            ]);
+        } else {
+            return response()->json([
+                'data' => "No Data",
+                'code' => 200
+            ]);
+        }
     }
 
     public function get_most_patients_gender()
@@ -126,6 +129,21 @@ class PatientStatController extends Controller
 
         return response()->json([
             'data' => $all_incomes / $patients,
+            'code' => 200
+        ]);
+    }
+
+    public function get_patient_treatments($number_of_patients)
+    {
+
+        $patients = Treatment::select('patient_id', 'service_id', DB::raw('count(*) as total'))
+            ->groupBy('patient_id')
+            ->orderBy('total', 'DESC')
+            ->with('patients:id,first_name,last_name,telephone,email')
+            ->get($number_of_patients);
+
+        return response()->json([
+            'data' => $patients,
             'code' => 200
         ]);
     }
