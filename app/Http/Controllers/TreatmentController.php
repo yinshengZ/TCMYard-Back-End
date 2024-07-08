@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
@@ -8,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\TreatmentUpdateRequest;
 
 use Exception;
+use DB;
 use Carbon\Carbon;
 
 use App\Models\Inventory;
@@ -27,8 +29,8 @@ class TreatmentController extends Controller
     {
         $treatments = Treatment::all()->with('category');
         return response()->json([
-            'data'=> $treatments,
-            'code'=>200
+            'data' => $treatments,
+            'code' => 200
         ]);
     }
 
@@ -40,8 +42,8 @@ class TreatmentController extends Controller
         $treatment_details = Treatment::where('id', $id)->with('category')->with('inventories')->with('incomes')->first();
 
         return response()->json([
-            'data'=> $treatment_details,
-            'code'=>200
+            'data' => $treatment_details,
+            'code' => 200
         ]);
     }
 
@@ -51,8 +53,33 @@ class TreatmentController extends Controller
     {
         $treatments = Treatment::where('patient_id', $id)->with('category')->with('inventories')->with('incomes')->orderBy('date', 'DESC')->get();
         return response()->json([
-            'data'=> $treatments,
-            'code'=>200
+            'data' => $treatments,
+            'code' => 200
+        ]);
+    }
+
+    public function getPatientTreatmentsDistribution($id)
+    {
+        $treatments = Treatment::select('id', 'service_id', DB::raw('count(service_id) as count'))
+            ->where('patient_id', $id)
+            ->groupBy('service_id')
+            ->with('category:id,categories')
+            ->get();
+
+        $incomes = Income::select('service_id', DB::raw('sum(amount) as total'))
+            ->where('patient_id', $id)
+            ->groupBy('service_id')
+            ->get();
+
+        foreach ($treatments as $index => $treatment) {
+            /* $treatment->merge($incomes->where('service_id', $treatment->service_id)); */
+            $treatment->income = $incomes->where('service_id', $treatment->service_id)->first();
+        }
+
+        /* return $incomes; */
+        return response()->json([
+            'data' => $treatments,
+            'code' => 200,
         ]);
     }
 
@@ -90,9 +117,9 @@ class TreatmentController extends Controller
             $income->original_amount = $request->original_price * 100;
             //$income->treatment_id = $treatment_ids['id'];
             $income->patient_id = $request->patient_id;
-            $income->user_id = $request->user_id;        
+            $income->user_id = $request->user_id;
             $income->discount = $request->discount;
- 
+
             $income->discount = $request->discount;
             if ($request->with_date) {
                 $income->date = $request->date;
@@ -107,8 +134,8 @@ class TreatmentController extends Controller
 
 
         return response()->json([
-            'data'=> 'Treatment has been added!',
-            'code'=>200
+            'data' => 'Treatment has been added!',
+            'code' => 200
         ]);
     }
 
@@ -155,8 +182,8 @@ class TreatmentController extends Controller
         }
 
         return response()->json([
-            'data'=> 'Treatment has been added!',
-            'code'=>200
+            'data' => 'Treatment has been added!',
+            'code' => 200
         ]);
     }
     /**
@@ -214,8 +241,8 @@ class TreatmentController extends Controller
         }
 
         return response()->json([
-            'data'=> 'Treatment has been added!',
-            'code'=>200
+            'data' => 'Treatment has been added!',
+            'code' => 200
         ]);
     }
 
@@ -263,8 +290,8 @@ class TreatmentController extends Controller
         }
 
         return response()->json([
-            'data'=> 'Treatment has been added!',
-            'code'=>200
+            'data' => 'Treatment has been added!',
+            'code' => 200
         ]);
     }
 
@@ -309,8 +336,8 @@ class TreatmentController extends Controller
         $treatment->save();
 
         return response()->json([
-            'data'=> 'Treatment has been updated!',
-            'code'=>200
+            'data' => 'Treatment has been updated!',
+            'code' => 200
         ]);
     }
 
@@ -352,8 +379,8 @@ class TreatmentController extends Controller
         $retail->save();
 
         return response()->json([
-            'data'=> 'Treatment has been updated!',
-            'code'=>200
+            'data' => 'Treatment has been updated!',
+            'code' => 200
         ]);
     }
 
@@ -381,8 +408,8 @@ class TreatmentController extends Controller
         $treatment->save();
 
         return response()->json([
-            'data'=> 'Treatment has been updated!',
-            'code'=>200
+            'data' => 'Treatment has been updated!',
+            'code' => 200
         ]);
     }
 
@@ -422,8 +449,8 @@ class TreatmentController extends Controller
 
 
         return response()->json([
-            'data'=> 'Treatment has been updated!',
-            'code'=>200
+            'data' => 'Treatment has been updated!',
+            'code' => 200
         ]);
     }
 
@@ -438,8 +465,8 @@ class TreatmentController extends Controller
         $treatment = Treatment::where('id', $id)->delete();
         $income = Income::where('treatment_id', $id)->delete();
         return response()->json([
-            'data'=> 'Treatment has been deleted!',
-            'code'=>200
+            'data' => 'Treatment has been deleted!',
+            'code' => 200
         ]);
     }
 }
