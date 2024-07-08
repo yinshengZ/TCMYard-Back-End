@@ -64,7 +64,7 @@ Route::group([
     Route::get('patient/stat/patient/current_year', [PatientStatController::class, 'get_current_year_monthly_patients']);
     Route::get('patient/stat/most_profitable', [PatientStatController::class, 'get_most_profitable_patients']);
     Route::get('patient/stat/newest', [PatientStatController::class, 'get_newest_patients']);
-    Route::get('patient/stat/treatments/{no_of_patients}',[PatientStatController::class,'get_patient_treatments']);
+    Route::get('patient/stat/treatments/{no_of_patients}', [PatientStatController::class, 'get_patient_treatments']);
 
     Route::get('inventory/category/{category_id}', [InventoryController::class, 'get_inventory_by_category']);
     Route::get('inventory/retail', [InventoryController::class, 'get_retails']);
@@ -134,27 +134,29 @@ Route::group([
     Route::get('finance/income/record/year', [FinanceController::class, 'get_highest_yearly_income']);
     Route::get('finance/income/record/spender', [FinanceController::class, 'get_highest_spender']);
 
-    Route::get('finance/expense/year/{year}',[FinanceController::class,'get_expense_by_year']);
-    Route::get('finance/expense/year',[FinanceController::class,'get_expense_years']);
+    Route::get('finance/expense/year/{year}', [FinanceController::class, 'get_expense_by_year']);
+    Route::get('finance/expense/year', [FinanceController::class, 'get_expense_years']);
     Route::get('finance/expense/expense_categories', [ExpenseCategoryController::class, 'index']);
-    Route::post('finance/expense/expense_categories',[ExpenseCategoryController::class,'store']);
+    Route::post('finance/expense/expense_categories', [ExpenseCategoryController::class, 'store']);
 
     /*     Route::get('finance/expense/{id}', [FinanceController::class, 'get_user_expenses']);
-     */   Route::post('finance/expense', [FinanceController::class, 'add_expense']);
-     Route::get('finance/expense/{id}',[FinanceController::class,'get_expense']);
-        Route::put('finance/expense', [FinanceController::class, 'update_expense']);
-        Route::delete('finance/expense/{id}',[FinanceController::class,'delete_expense']);
-       // Route::delete('finance/expense/{id}', [FinanceController::class, 'delete_expense']);
+     */
+    Route::post('finance/expense', [FinanceController::class, 'add_expense']);
+    Route::get('finance/expense/{id}', [FinanceController::class, 'get_expense']);
+    Route::put('finance/expense', [FinanceController::class, 'update_expense']);
+    Route::delete('finance/expense/{id}', [FinanceController::class, 'delete_expense']);
+    // Route::delete('finance/expense/{id}', [FinanceController::class, 'delete_expense']);
 
-  
+
 
 
 
 
     Route::get('payment_methods', [PaymentMethodController::class, 'index']);
-    Route::post('payment_methods',[PaymentMethodController::class,'store']);
+    Route::post('payment_methods', [PaymentMethodController::class, 'store']);
 
     Route::get('treatment/patient/{id}', [TreatmentController::class, 'getPatientTreatments']);
+    Route::get('treatment/patient/distribution/{id}', [TreatmentController::class, 'getPatientTreatmentsDistribution']);
 
     Route::post('income/service', [IncomeController::class, 'addIncomeByService']);
 
