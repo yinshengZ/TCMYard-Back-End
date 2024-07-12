@@ -24,6 +24,18 @@ class PatientStatController extends Controller
         ]);
     }
 
+    public function get_patient_years()
+    {
+        $patients = Patient::select(DB::raw('Year(date_joined) as year'))
+            ->groupBy('year')
+            ->orderBy('year', 'desc')
+            ->get();
+        return response()->json([
+            'data' => $patients,
+            'code' => 200
+        ]);
+    }
+
     public function get_newest_patients()
     {
         $patient = Patient::orderBy('date_joined', 'desc')->take(10)->get();
@@ -101,10 +113,28 @@ class PatientStatController extends Controller
 
     public function get_most_patients_gender()
     {
-        $gender = Patient::select('gender_id', DB::raw('count(*) as total'))->groupBy('gender_id')->orderBy('total', 'DESC')->with('gender')->get();
+        $gender = Patient::select('gender_id', DB::raw('count(*) as total'))
+            ->groupBy('gender_id')
+            ->orderBy('total', 'DESC')
+            ->with('gender:id,gender')
+            ->get();
 
         return response()->json([
             'data' => $gender,
+            'code' => 200
+        ]);
+    }
+
+    public function get_patients_genders_by_year($year)
+    {
+        $genders = Patient::select('gender_id', DB::raw('count(*) as total'), 'date_joined')
+            ->whereYear('date_joined', $year)
+            ->groupBy('gender_id')
+            ->orderBy('total', 'DESC')
+            ->with('gender:id,gender')
+            ->get();
+        return response()->json([
+            'data' => $genders,
             'code' => 200
         ]);
     }
