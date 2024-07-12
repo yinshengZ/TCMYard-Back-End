@@ -58,7 +58,9 @@ Route::group([
 
 
     Route::get('patient/new/custom/{number}', [PatientStatController::class, 'get_custom_number_patients']);
+    Route::get('patient/stat/years', [PatientStatController::class, 'get_patient_years']);
     Route::get('patient/stat/gender', [PatientStatController::class, 'get_most_patients_gender']);
+    Route::get('patient/stat/gender/year/{year}', [PatientStatController::class, 'get_patients_genders_by_year']);
     Route::get('patient/stat/average_spending', [PatientStatController::class, 'get_patient_average_spending']);
     Route::get('patient/stat/locale', [PatientStatController::class, 'get_most_patients_locale']);
     Route::get('patient/stat/patient/current_year', [PatientStatController::class, 'get_current_year_monthly_patients']);
