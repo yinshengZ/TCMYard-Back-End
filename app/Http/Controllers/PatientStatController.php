@@ -139,6 +139,20 @@ class PatientStatController extends Controller
         ]);
     }
 
+    public function get_patients_genders_list_by_year($year)
+    {
+        $genders_list = Patient::select('gender_id', 'date_joined')
+            ->whereYear('date_joined', $year)
+            ->groupBy('gender_id')
+            ->orderBy('gender_id', 'ASC')
+            ->with('gender:id,gender')
+            ->get();
+        return response()->json([
+            'data' => $genders_list,
+            'code' => 200
+        ]);
+    }
+
     public function get_most_patients_locale()
     {
         $locale = Patient::select('postcode', DB::raw("SUBSTRING_INDEX(postcode,' ',1) as locale"), DB::raw("count(SUBSTRING_INDEX(postcode,' ',1)) as total"))
