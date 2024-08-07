@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Patient;
 use App\Models\Income;
 use App\Models\Treatment;
+use App\Models\Gender;
 use DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Carbon;
@@ -127,14 +128,62 @@ class PatientStatController extends Controller
 
     public function get_patients_genders_by_year($year)
     {
+
         $genders = Patient::select('gender_id', DB::raw('count(*) as total'), 'date_joined')
             ->whereYear('date_joined', $year)
             ->groupBy('gender_id')
             ->orderBy('total', 'DESC')
             ->with('gender:id,gender')
             ->get();
+
         return response()->json([
             'data' => $genders,
+            'code' => 200
+        ]);
+    }
+
+    public function get_pateints_by_gender_with_year($gender, $year)
+    {
+
+        $patients = Patient::select('gender_id', DB::raw('count(*) as total'), DB::raw('Month(date_joined) as month'))
+            ->whereYear('date_joined', $year)
+            ->where('gender_id', $gender)
+            ->groupBy('month')
+            ->orderBy('date_joined', 'asc')
+            ->with('gender:id,gender')
+            ->get();
+        $gender_data = Gender::select('id', 'gender')->where('id', $gender)->first();
+
+        if (count($patients) > 0) {
+            $months = Ultilities::getAllMonths('short');
+            $num_months = Ultilities::getAllMonths('num');
+
+            $final_data = [];
+            $patients_data = $patients->shift();
+
+            for ($i = 0; $i < count($num_months); $i++) {
+                if ($num_months[$i] == $patients_data->month) {
+                    $patients_data->short_month = $months[$i];
+                    array_push($final_data, $patients_data);
+                    if ($patients->count() > 0) {
+                        $patients_data = $patients->shift();
+                    }
+                    continue;
+                } else {
+                    $month = (int)$num_months[$i];
+                    $gender_month_data = new stdClass();
+                    $gender_month_data->gender_id = $gender;
+                    $gender_month_data->total = 0;
+                    $gender_month_data->month = $month;
+                    $gender_month_data->short_month = $months[$i];
+                    $gender_month_data->gender = $gender_data;
+                    array_push($final_data, $gender_month_data);
+                }
+            }
+        }
+
+        return response()->json([
+            'data' => $final_data,
             'code' => 200
         ]);
     }
@@ -152,6 +201,8 @@ class PatientStatController extends Controller
             'code' => 200
         ]);
     }
+
+
 
     public function get_most_patients_locale()
     {
