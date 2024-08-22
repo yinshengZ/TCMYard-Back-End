@@ -180,6 +180,12 @@ class TreatmentController extends Controller
 
     public function addServices(Request $request)
     {
+        $request->validate([
+            'quantity' => 'required|Numeric|min:1',
+            'patient_id' => 'required',
+            'service_id' => 'required',
+            'user_id' => 'required',
+        ]);
         DB::transaction(function () use ($request) {
             $service = new Treatment;
             $service->service_id = $request->service_id;
