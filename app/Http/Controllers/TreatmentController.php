@@ -239,50 +239,78 @@ class TreatmentController extends Controller
     public function addRetail(Request $request)
     {
         //TODO: add check stocks before adding!
-        $retail_ids = [];
-        $retail_units = [];
+
+        $request->validate([
+            'quantity' => 'required|Numeric|min:1',
+            'patient_id' => 'required',
+            'service_id' => 'required',
+            'user_id' => 'required',
+        ]);
 
 
-        foreach ($request->retail_details as $key => $retail_detail) {
-            array_push($retail_ids, $retail_detail['id']);
-            array_push($retail_units, $retail_detail['units']);
-        }
+        //check retail stocks
+        $retails = $request->retail_details;
 
-
-        $treatment = new Treatment;
-        $treatment->service_id = $request->service_id;
-        $treatment->patient_id = $request->patient_id;
-        $treatment->user_id = $request->user_id;
-        $treatment->quantity = 1;
-        if ($request->with_date) {
-            $treatment->date = $request->date;
-        }
-
-        $treatment->save();
-
-        foreach ($retail_ids as $key => $retail_id) {
-            $treatment->inventories()->attach($retail_ids[$key], ['units' => $retail_units[$key]]);
-        }
-
-        if ($request->with_finance) {
-            $income = new Income;
-
-            $income->amount = $request->final_price * 100;
-            $income->original_amount = $request->original_price * 100;
-            $income->payment_type_id = $request->payment_type_id;
-            $income->patient_id = $request->patient_id;
-            $income->user_id = $request->user_id;
-            $income->service_id = $request->service_id;
-            $income->discount = $request->discount;
-            $income->description = $request->description;
-
-            if ($request->with_date) {
-                $income->date = $request->date;
-            } else {
-                $income->date = Carbon::today();
+        foreach ($retails as $retail) {
+            $stock = Inventory::select('stock', 'id', 'name')
+                ->where('id', $retail['id'], $retail['id'])
+                ->first();
+            if ($stock->stock < $retail['units']) {
+                return response()->json([
+                    'data' => "$retail->name" . ' does not have enough stocks left!',
+                    'code' => 90001
+                ]);
             }
-            $treatment->incomes()->save($income);
         }
+
+
+        DB::transaction(function () use ($request) {
+            $retail_ids = [];
+            $retail_units = [];
+
+
+            foreach ($request->retail_details as $key => $retail_detail) {
+                array_push($retail_ids, $retail_detail['id']);
+                array_push($retail_units, $retail_detail['units']);
+            }
+
+
+            $treatment = new Treatment;
+            $treatment->service_id = $request->service_id;
+            $treatment->patient_id = $request->patient_id;
+            $treatment->user_id = $request->user_id;
+            $treatment->quantity = 1;
+            if ($request->with_date) {
+                $treatment->date = $request->date;
+            }
+
+            $treatment->save();
+
+            foreach ($retail_ids as $key => $retail_id) {
+                $treatment->inventories()->attach($retail_ids[$key], ['units' => $retail_units[$key]]);
+            }
+
+            if ($request->with_finance) {
+                $income = new Income;
+
+                $income->amount = $request->final_price * 100;
+                $income->original_amount = $request->original_price * 100;
+                $income->payment_type_id = $request->payment_type_id;
+                $income->patient_id = $request->patient_id;
+                $income->user_id = $request->user_id;
+                $income->service_id = $request->service_id;
+                $income->discount = $request->discount;
+                $income->description = $request->description;
+
+                if ($request->with_date) {
+                    $income->date = $request->date;
+                } else {
+                    $income->date = Carbon::today();
+                }
+                $treatment->incomes()->save($income);
+            }
+        });
+
 
         return response()->json([
             'data' => 'Treatment has been added!',
