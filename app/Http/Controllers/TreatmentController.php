@@ -399,42 +399,45 @@ class TreatmentController extends Controller
 
     public function updateHerb(TreatmentUpdateRequest $request)
     {
-        $herb_ids = [];
-        $herb_units = [];
+        DB::transaction(function () use ($request) {
+            $herb_ids = [];
+            $herb_units = [];
 
 
 
 
-        foreach ($request->inventories as $key => $herb_detail) {
-            array_push($herb_ids, $herb_detail['id']);
-            array_push($herb_units, $herb_detail['pivot']['units']);
-        }
-        //reconstructing inventory details for sync()
-        //sync() required format [1=>['units']=>10]
-        $units = array_map(function ($units) {
-            return ['units' => $units];
-        }, $herb_units);
+            foreach ($request->inventories as $key => $herb_detail) {
+                array_push($herb_ids, $herb_detail['id']);
+                array_push($herb_units, $herb_detail['pivot']['units']);
+            }
+            //reconstructing inventory details for sync()
+            //sync() required format [1=>['units']=>10]
+            $units = array_map(function ($units) {
+                return ['units' => $units];
+            }, $herb_units);
 
-        $updated_inventories = array_combine($herb_ids, $units);
+            $updated_inventories = array_combine($herb_ids, $units);
 
 
-        $treatment = Treatment::findOrFail($request->id);
-        $treatment->quantity = $request->quantity;
-        if ($request->with_date) {
-            $treatment->date = $request->date;
-        }
+            $treatment = Treatment::findOrFail($request->id);
+            $treatment->quantity = $request->quantity;
+            if ($request->with_date) {
+                $treatment->date = $request->date;
+            }
 
-        if ($request->with_finance) {
-            $income =  $request->incomes[0];
+            if ($request->with_finance) {
+                $income =  $request->incomes[0];
 
-            $income['amount'] = $income['amount'] * 100;
-            $income['original_amount'] = $income['original_amount'] * 100;
-            $treatment->incomes()->update($income);
-        }
+                $income['amount'] = $income['amount'] * 100;
+                $income['original_amount'] = $income['original_amount'] * 100;
+                $treatment->incomes()->update($income);
+            }
 
-        $treatment->inventories()->sync($updated_inventories);
+            $treatment->inventories()->sync($updated_inventories);
 
-        $treatment->save();
+            $treatment->save();
+        });
+
 
         return response()->json([
             'data' => 'Treatment has been updated!',
@@ -445,39 +448,43 @@ class TreatmentController extends Controller
     public function updateRetail(TreatmentUpdateRequest $request)
     {
 
-        $retail_ids = [];
-        $retail_units = [];
+        DB::transaction(function () use ($request) {
+            $retail_ids = [];
+            $retail_units = [];
 
 
 
-        foreach ($request->inventories as $key => $retail_detail) {
-            array_push($retail_ids, $retail_detail['id']);
-            array_push($retail_units, $retail_detail['pivot']['units']);
-        }
+            foreach ($request->inventories as $key => $retail_detail) {
+                array_push($retail_ids, $retail_detail['id']);
+                array_push($retail_units, $retail_detail['pivot']['units']);
+            }
 
-        $units = array_map(function ($units) {
-            return ['units' => $units];
-        }, $retail_units);
+            $units = array_map(function ($units) {
+                return ['units' => $units];
+            }, $retail_units);
 
-        $updated_inventories = array_combine($retail_ids, $units);
+            $updated_inventories = array_combine($retail_ids, $units);
 
-        $retail = Treatment::findOrFail($request->id);
-        $retail->quantity = $request->quantity;
-        if ($request->with_date) {
-            $retail->date = $request->date;
-        }
+            $retail = Treatment::findOrFail($request->id);
+            $retail->quantity = $request->quantity;
+            if ($request->with_date) {
+                $retail->date = $request->date;
+            }
 
-        if ($request->with_finance) {
+            if ($request->with_finance) {
 
-            $income = $request->incomes[0];
+                $income = $request->incomes[0];
 
-            $income['amount'] = $income['amount'] * 100;
-            $income['original_amount'] = $income['original_amount'] * 100;
-            $retail->incomes()->update($income);
-        }
+                $income['amount'] = $income['amount'] * 100;
+                $income['original_amount'] = $income['original_amount'] * 100;
+                $retail->incomes()->update($income);
+            }
 
-        $retail->inventories()->sync($updated_inventories);
-        $retail->save();
+            $retail->inventories()->sync($updated_inventories);
+            $retail->save();
+        });
+
+
 
         return response()->json([
             'data' => 'Treatment has been updated!',
@@ -488,25 +495,28 @@ class TreatmentController extends Controller
 
     public function updateService(TreatmentUpdateRequest $request)
     {
-        $inventory_id = $request->inventories[0]['pivot']['inventory_id'];
+        DB::transaction(function () use ($request) {
+            $inventory_id = $request->inventories[0]['pivot']['inventory_id'];
 
 
-        $treatment = Treatment::findOrFail($request->id);
-        $treatment->quantity = $request->quantity;
-        if ($request->with_date) {
-            $treatment->date = Carbon::parse($request->date);
-        }
+            $treatment = Treatment::findOrFail($request->id);
+            $treatment->quantity = $request->quantity;
+            if ($request->with_date) {
+                $treatment->date = Carbon::parse($request->date);
+            }
 
-        if ($request->with_finance) {
-            $income = $request->incomes[0];
+            if ($request->with_finance) {
+                $income = $request->incomes[0];
 
-            $income['amount'] = $income['amount'] * 100;
-            $income['original_amount'] = $income['original_amount'] * 100;
-            $treatment->incomes()->update($income);
-        }
+                $income['amount'] = $income['amount'] * 100;
+                $income['original_amount'] = $income['original_amount'] * 100;
+                $treatment->incomes()->update($income);
+            }
 
-        $treatment->inventories()->sync([$inventory_id], ['units' => 1]);
-        $treatment->save();
+            $treatment->inventories()->sync([$inventory_id], ['units' => 1]);
+            $treatment->save();
+        });
+
 
         return response()->json([
             'data' => 'Treatment has been updated!',
@@ -517,36 +527,38 @@ class TreatmentController extends Controller
     public function updateOther(TreatmentUpdateRequest $request)
     {
 
-        $other_ids = [];
-        $other_units = [];
+        DB::transaction(function () use ($request) {
+            $other_ids = [];
+            $other_units = [];
 
-        foreach ($request->inventories as $key => $other_detail) {
-            array_push($other_ids, $other_detail['pivot']['inventory_id']);
-            array_push($other_units, $other_detail['pivot']['units']);
-        }
+            foreach ($request->inventories as $key => $other_detail) {
+                array_push($other_ids, $other_detail['pivot']['inventory_id']);
+                array_push($other_units, $other_detail['pivot']['units']);
+            }
 
-        $units = array_map(function ($units) {
-            return ['units' => $units];
-        }, $other_units);
+            $units = array_map(function ($units) {
+                return ['units' => $units];
+            }, $other_units);
 
 
-        $updated_inventories = array_combine($other_ids, $units);
+            $updated_inventories = array_combine($other_ids, $units);
 
-        $other = Treatment::findOrFail($request->id);
-        $other->quantity = $request->quantity;
-        if ($request->with_date) {
-            $other->date = $request->date;
-        }
+            $other = Treatment::findOrFail($request->id);
+            $other->quantity = $request->quantity;
+            if ($request->with_date) {
+                $other->date = $request->date;
+            }
 
-        if ($request->with_finance) {
-            $income = $request->incomes[0];
-            $income['amount'] = $income['amount'] * 100;
-            $income['original_amount'] = $income['original_amount'] * 100;
-            $other->incomes()->update($income);
-        }
+            if ($request->with_finance) {
+                $income = $request->incomes[0];
+                $income['amount'] = $income['amount'] * 100;
+                $income['original_amount'] = $income['original_amount'] * 100;
+                $other->incomes()->update($income);
+            }
 
-        $other->inventories()->sync($updated_inventories);
-        $other->save();
+            $other->inventories()->sync($updated_inventories);
+            $other->save();
+        });
 
 
         return response()->json([
