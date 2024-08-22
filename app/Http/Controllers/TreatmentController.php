@@ -180,41 +180,44 @@ class TreatmentController extends Controller
 
     public function addServices(Request $request)
     {
-        $service = new Treatment;
-        $service->service_id = $request->service_id;
-        $service->patient_id = $request->patient_id;
-        $service->user_id = $request->user_id;
-        $service->quantity = $request->quantity;
-        if ($request->with_date) {
-            $service->date = $request->date;
-        } else {
-            $service->date = Carbon::today();
-        }
-        $service->discount = $request->discount;
-        $service->save();
-
-        $service->inventories()->attach($request->id, ['units' => $request->unit]);
-
-        if ($request->with_finance) {
-            $income = new Income;
-
-            $income->amount = $request->final_price * 100;
-            $income->original_amount = $request->original_price * 100;
-            $income->payment_type_id = $request->payment_type_id;
-            $income->patient_id = $request->patient_id;
-            $income->user_id = $request->user_id;
-            $income->service_id = $request->service_id;
-            $income->discount = $request->discount;
-            $income->description = $request->description;
-
+        DB::transaction(function () use ($request) {
+            $service = new Treatment;
+            $service->service_id = $request->service_id;
+            $service->patient_id = $request->patient_id;
+            $service->user_id = $request->user_id;
+            $service->quantity = $request->quantity;
             if ($request->with_date) {
-                $income->date = $request->date;
+                $service->date = $request->date;
             } else {
-                $income->date = Carbon::today();
+                $service->date = Carbon::today();
             }
+            $service->discount = $request->discount;
+            $service->save();
 
-            $service->incomes()->save($income);
-        }
+            $service->inventories()->attach($request->id, ['units' => $request->unit]);
+
+            if ($request->with_finance) {
+                $income = new Income;
+
+                $income->amount = $request->final_price * 100;
+                $income->original_amount = $request->original_price * 100;
+                $income->payment_type_id = $request->payment_type_id;
+                $income->patient_id = $request->patient_id;
+                $income->user_id = $request->user_id;
+                $income->service_id = $request->service_id;
+                $income->discount = $request->discount;
+                $income->description = $request->description;
+
+                if ($request->with_date) {
+                    $income->date = $request->date;
+                } else {
+                    $income->date = Carbon::today();
+                }
+
+                $service->incomes()->save($income);
+            }
+        });
+
 
         return response()->json([
             'data' => 'Treatment has been added!',
