@@ -27,12 +27,15 @@ use App\Http\Controllers\ExpenseTypeController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\InventoryStatController;
 use App\Http\Controllers\ExpenseCategoryController;
+use App\Http\Controllers\InventoryUsageController;
+use App\Http\Controllers\InventoryStockingController;
 use App\Models\ExpenseCategory;
 
 Route::group([
     'middleware' => ['auth:sanctum'],
 ], function () {
     Route::get('/logout', [UserController::class, 'logout']);
+
     Route::get('/user/info', [UserController::class, 'get_user_info']);
 
     Route::post('patient/disease/tag', [PatientController::class, 'add_patient_disease']);
@@ -167,6 +170,7 @@ Route::group([
 
     Route::get('todo/{user_id}', [TodoController::class, 'user_todo_list']);
 
+    //InventoryStatController;
     Route::get('inventory/used_years/', [InventoryStatController::class, 'get_all_inventory_recorded_years']);
     Route::get('inventory/used_years/{id}', [InventoryStatController::class, 'get_inventory_used_years']);
     Route::get('inventory/expirying', [InventoryStatController::class, 'get_expirying_inventories']);
@@ -175,6 +179,21 @@ Route::group([
     Route::get('inventory/usage_units/{id}/{year}', [InventoryStatController::class, 'get_inventory_usage_units']);
     Route::get('inventory/most_quantity/{quantity}/{year}', [InventoryStatController::class, 'most_quantity_used']);
     Route::get('inventory/lowest_stocks', [InventoryStatController::class, 'lowest_stocks']);
+
+    //InventoryUsageController;
+    Route::post('inventory/usage', [InventoryUsageController::class, 'store']);
+    Route::get('inventory/usage/{id}', [InventoryUsageController::class, 'show']);
+    Route::get('inventory/usage', [InventoryUsageController::class, 'index']);
+    Route::put('inventory/usage', [InventoryUsageController::class, 'update']);
+    Route::delete('inventory/usage/{id}', [InventoryUsageController::class, 'destroy']);
+
+    //Inventory Stockings;
+    Route::post('inventory/stocking', [InventoryStockingController::class, 'store']);
+    Route::get('inventory/stocking', [InventoryStockingController::class, 'index']);
+    Route::get('inventory/stocking/{id}', [InventoryStockingController::class, 'show']);
+    Route::put('inventory/stocking', [InventoryStockingController::class, 'udpate']);
+    Route::delete('inventory/stocking/{id}', [InventoryStockingController::class, 'destroy']);
+
 
     Route::resource('patient', PatientController::class);
     Route::apiResource('gender', GenderController::class);
@@ -194,3 +213,4 @@ Route::group([
 
 
 Route::post('/login', [UserController::class, 'login']);
+Route::post('/register', [UserController::class, 'register']);
