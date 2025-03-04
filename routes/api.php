@@ -29,6 +29,8 @@ use App\Http\Controllers\InventoryStatController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\InventoryUsageController;
 use App\Http\Controllers\InventoryStockingController;
+use App\Http\Controllers\SkuController;
+use App\Http\Controllers\SkuUsageController;
 use App\Models\ExpenseCategory;
 
 Route::group([
@@ -179,6 +181,20 @@ Route::group([
     Route::get('inventory/usage_units/{id}/{year}', [InventoryStatController::class, 'get_inventory_usage_units']);
     Route::get('inventory/most_quantity/{quantity}/{year}', [InventoryStatController::class, 'most_quantity_used']);
     Route::get('inventory/lowest_stocks', [InventoryStatController::class, 'lowest_stocks']);
+
+    //SKU controllers;
+    Route::get('inventory/sku/{id}', [InventoryController::class, 'get_inventory_skus']);
+    Route::post('inventory/sku', [SkuController::class, 'store']);
+    Route::put('inventory/sku', [InventoryController::class, 'update_sku']);
+    Route::delete('inventory/sku/{id}', [InventoryController::class, 'delete_sku']);
+
+    //SKU usage controllers;
+    Route::post('inventory/sku_usage/{usage}', [SkuUsageController::class, 'store']);
+    Route::get('inventory/sku_usage/{id}', [SkuUsageController::class, 'show']);
+    Route::get('inventory/sku_usage', [SkuUsageController::class, 'index']);
+    Route::get('inventory/sku_usage/sku/{id}', [SkuUsageController::class, 'search_by_sku_id']);
+    Route::delete('inventory/sku_usage/{id}', [SkuUsageController::class, 'delete']);
+
 
     //InventoryUsageController;
     Route::post('inventory/usage', [InventoryUsageController::class, 'store']);
