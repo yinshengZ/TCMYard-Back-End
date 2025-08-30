@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Http\Controllers\Controller;
 use App\Models\Inventory;
 use App\Models\Category;
@@ -18,8 +19,8 @@ class InventoryController extends Controller
     {
         $inventory = Inventory::with('category')->get();
         return response()->json([
-            'data'=> $inventory,
-            'code'=>200
+            'data' => $inventory,
+            'code' => 200
         ]);
     }
 
@@ -59,8 +60,8 @@ class InventoryController extends Controller
 
         $inventory->save();
         return response()->json([
-            'data'=> 'Inventory has been added!',
-            'code'=>200
+            'data' => 'Inventory has been added!',
+            'code' => 200
         ]);
     }
 
@@ -72,10 +73,10 @@ class InventoryController extends Controller
      */
     public function show($id)
     {
-        $inventory = Inventory::with('category')->find($id);
+        $inventory = Inventory::with('category')->with('skus')->find($id);
         return response()->json([
-            'data'=> $inventory,
-            'code'=>200
+            'data' => $inventory,
+            'code' => 200
         ]);
     }
 
@@ -109,8 +110,8 @@ class InventoryController extends Controller
         $inventory->save();
 
         return response()->json([
-            'data'=> 'Inventory has been updated!',
-            'code'=>200
+            'data' => 'Inventory has been updated!',
+            'code' => 200
         ]);
     }
 
@@ -119,8 +120,8 @@ class InventoryController extends Controller
         $categories_id = Category::where('categories', $categories)->get()->pluck('id');
         $inventory = Inventory::whereIn('categories_id', $categories_id)->get();
         return response()->json([
-            'data'=> $inventory,
-            'code'=>200
+            'data' => $inventory,
+            'code' => 200
         ]);
     }
 
@@ -128,8 +129,8 @@ class InventoryController extends Controller
     {
         $herbs = Inventory::where('categories_id', 1)->get();
         return response()->json([
-            'data'=> $herbs,
-            'code'=>200
+            'data' => $herbs,
+            'code' => 200
         ]);
     }
 
@@ -137,8 +138,8 @@ class InventoryController extends Controller
     {
         $services = Inventory::where('categories_id', 2)->get();
         return response()->json([
-            'data'=> $services,
-            'code'=>200
+            'data' => $services,
+            'code' => 200
         ]);
     }
 
@@ -146,8 +147,8 @@ class InventoryController extends Controller
     {
         $retails = Inventory::where('categories_id', 3)->get();
         return response()->json([
-            'data'=> $retails,
-            'code'=>200
+            'data' => $retails,
+            'code' => 200
         ]);
     }
 
@@ -155,14 +156,12 @@ class InventoryController extends Controller
     {
         $others = Inventory::where('categories_id', '>=', '4')->get();
         return response()->json([
-            'data'=> $others,
-            'code'=>200
+            'data' => $others,
+            'code' => 200
         ]);
     }
 
-    public function get_expirying()
-    {
-    }
+    public function get_expirying() {}
 
     /**
      * Remove the specified resource from storage.
@@ -174,8 +173,8 @@ class InventoryController extends Controller
     {
         $inventory = Inventory::where('id', $id)->delete();
         return response()->json([
-            'data'=>"Inventory has been deleted!",
-            'code'=>200
+            'data' => "Inventory has been deleted!",
+            'code' => 200
         ]);
     }
 }

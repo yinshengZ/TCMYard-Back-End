@@ -27,12 +27,17 @@ use App\Http\Controllers\ExpenseTypeController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\InventoryStatController;
 use App\Http\Controllers\ExpenseCategoryController;
+use App\Http\Controllers\InventoryUsageController;
+use App\Http\Controllers\InventoryStockingController;
+use App\Http\Controllers\SkuController;
+use App\Http\Controllers\SkuUsageController;
 use App\Models\ExpenseCategory;
 
 Route::group([
     'middleware' => ['auth:sanctum'],
 ], function () {
     Route::get('/logout', [UserController::class, 'logout']);
+
     Route::get('/user/info', [UserController::class, 'get_user_info']);
 
     Route::post('patient/disease/tag', [PatientController::class, 'add_patient_disease']);
@@ -60,7 +65,10 @@ Route::group([
     Route::get('patient/new/custom/{number}', [PatientStatController::class, 'get_custom_number_patients']);
     Route::get('patient/stat/years', [PatientStatController::class, 'get_patient_years']);
     Route::get('patient/stat/gender', [PatientStatController::class, 'get_most_patients_gender']);
+    Route::get('patient/stat/gender/list/{year}', [PatientStatController::class, 'get_patients_genders_list_by_year']);
     Route::get('patient/stat/gender/year/{year}', [PatientStatController::class, 'get_patients_genders_by_year']);
+    Route::get('patient/stat/gender/{gender}/{year}', [PatientStatController::class, 'get_pateints_by_gender_with_year']);
+    Route::get('patient/stat/gender/yearly/id/{gender}', [PatientStatController::class, 'get_yearly_patients_count_by_gender']);
     Route::get('patient/stat/average_spending', [PatientStatController::class, 'get_patient_average_spending']);
     Route::get('patient/stat/locale', [PatientStatController::class, 'get_most_patients_locale']);
     Route::get('patient/stat/patient/current_year', [PatientStatController::class, 'get_current_year_monthly_patients']);
@@ -164,6 +172,7 @@ Route::group([
 
     Route::get('todo/{user_id}', [TodoController::class, 'user_todo_list']);
 
+    //InventoryStatController;
     Route::get('inventory/used_years/', [InventoryStatController::class, 'get_all_inventory_recorded_years']);
     Route::get('inventory/used_years/{id}', [InventoryStatController::class, 'get_inventory_used_years']);
     Route::get('inventory/expirying', [InventoryStatController::class, 'get_expirying_inventories']);
@@ -172,6 +181,35 @@ Route::group([
     Route::get('inventory/usage_units/{id}/{year}', [InventoryStatController::class, 'get_inventory_usage_units']);
     Route::get('inventory/most_quantity/{quantity}/{year}', [InventoryStatController::class, 'most_quantity_used']);
     Route::get('inventory/lowest_stocks', [InventoryStatController::class, 'lowest_stocks']);
+
+    //SKU controllers;
+    Route::get('inventory/sku/{id}', [InventoryController::class, 'get_inventory_skus']);
+    Route::post('inventory/sku', [SkuController::class, 'store']);
+    Route::put('inventory/sku', [InventoryController::class, 'update_sku']);
+    Route::delete('inventory/sku/{id}', [InventoryController::class, 'delete_sku']);
+
+    //SKU usage controllers;
+    Route::post('inventory/sku_usage/{usage}', [SkuUsageController::class, 'store']);
+    Route::get('inventory/sku_usage/{id}', [SkuUsageController::class, 'show']);
+    Route::get('inventory/sku_usage', [SkuUsageController::class, 'index']);
+    Route::get('inventory/sku_usage/sku/{id}', [SkuUsageController::class, 'search_by_sku_id']);
+    Route::delete('inventory/sku_usage/{id}', [SkuUsageController::class, 'delete']);
+
+
+    //InventoryUsageController;
+    Route::post('inventory/usage', [InventoryUsageController::class, 'store']);
+    Route::get('inventory/usage/{id}', [InventoryUsageController::class, 'show']);
+    Route::get('inventory/usage', [InventoryUsageController::class, 'index']);
+    Route::put('inventory/usage', [InventoryUsageController::class, 'update']);
+    Route::delete('inventory/usage/{id}', [InventoryUsageController::class, 'destroy']);
+
+    //Inventory Stockings;
+    Route::post('inventory/stocking', [InventoryStockingController::class, 'store']);
+    Route::get('inventory/stocking', [InventoryStockingController::class, 'index']);
+    Route::get('inventory/stocking/{id}', [InventoryStockingController::class, 'show']);
+    Route::put('inventory/stocking', [InventoryStockingController::class, 'udpate']);
+    Route::delete('inventory/stocking/{id}', [InventoryStockingController::class, 'destroy']);
+
 
     Route::resource('patient', PatientController::class);
     Route::apiResource('gender', GenderController::class);
@@ -191,3 +229,4 @@ Route::group([
 
 
 Route::post('/login', [UserController::class, 'login']);
+Route::post('/register', [UserController::class, 'register']);

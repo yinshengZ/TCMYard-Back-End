@@ -18,7 +18,9 @@ class CreateRecordsTable extends Migration
             $table->longText('record_body');
             $table->unsignedBigInteger('patient_id');
             $table->unsignedBigInteger('user_id');
-            $table->softDeletes($columns='deleted_at');
+            $table->unsignedBigInteger('treatment_id');
+
+            $table->softDeletes($columns = 'deleted_at');
             $table->timestamps();
         });
     }

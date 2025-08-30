@@ -18,6 +18,10 @@ class CreateTreatmentsTable extends Migration
             $table->unsignedBigInteger('service_id');
             $table->unsignedBigInteger('patient_id');
             $table->unsignedBigInteger('user_id');
+            $table->integer('discount')->default(0);
+            $table->foreign('service_id')->references('id')->on('inventory_categories');
+            $table->foreign('patient_id')->references('id')->on('patients');
+            $table->foreign('user_id')->references('id')->on('users');
             $table->unsignedBigInteger('quantity');
             $table->date('date');
             $table->softDeletes('deleted_at');

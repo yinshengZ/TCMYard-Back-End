@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Record;
@@ -17,9 +18,10 @@ class RecordController extends Controller
     public function index()
     {
         $records = Record::with('patient:id,first_name,last_name')->with('user:id,nickname')->get();
+
         return response()->json([
-            'data'=> $records,
-            'code'=>200
+            'data' => $records,
+            'code' => 200
         ]);
     }
 
@@ -27,8 +29,8 @@ class RecordController extends Controller
     {
         $records = Record::where('patient_id', $patient_id)->with('user')->orderBy('created_at', 'DESC')->get();
         return response()->json([
-            'data'=> $records,
-            'code'=>200
+            'data' => $records,
+            'code' => 200
         ]);
     }
 
@@ -55,8 +57,8 @@ class RecordController extends Controller
         $record->save();
 
         return response()->json([
-            'data'=> 'Record has been added!',
-            'code'=>200
+            'data' => 'Record has been added!',
+            'code' => 200
         ]);
     }
 
@@ -70,8 +72,8 @@ class RecordController extends Controller
     {
         $records = Record::where('id', $id)->first();
         return response()->json([
-            'data'=> $records,
-            'code'=>200
+            'data' => $records,
+            'code' => 200
         ]);
     }
 
@@ -97,8 +99,8 @@ class RecordController extends Controller
         $record->save();
 
         return response()->json([
-            'data'=> 'Record has been updated!',
-            'code'=>200
+            'data' => 'Record has been updated!',
+            'code' => 200
         ]);
     }
 
@@ -113,8 +115,8 @@ class RecordController extends Controller
         $record = Record::find($id);
         $record->delete();
         return response()->json([
-            'data'=> 'Record has been deleted!',
-            'code'=>200
+            'data' => 'Record has been deleted!',
+            'code' => 200
         ]);
     }
 }

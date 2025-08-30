@@ -2,16 +2,103 @@
 
 namespace App\Services;
 
-use DB;
+//use \illuminate\Support\Facades\DB;
 
 use App\Models\Treatment;
 use App\Models\Inventory;
 use App\Models\TreatmentDetails;
 use App\Models\Category;
+use App\Models\SkuUsage;
 use Exception;
+use Illuminate\Http\Request;
+use App\Http\Requests\TreatmentDetailsRequest;
+use DB;
 
 class TreatmentService
 {
+
+    public static function addTreatment(TreatmentDetailsRequest $treatment_details)
+    {
+
+
+
+        /**
+         * TODO: check if the sku belongs to the inventory
+         */
+
+
+        // check stocks availability
+        $stocks = InventoryService::checkStocks($treatment_details->service_id, $treatment_details->sku_usage, $treatment_details->quantity);
+
+        // return $stocks;
+        /* if ($treatment_details->service_id == 2) {
+            return $stocks;
+        }
+ */
+        if ($stocks->enough_stocks != true) {
+            $inssuficient_stocks = collect($stocks->stock_check_details)->where('enough_stocks', false);
+            return response()->json([
+                'message' => 'The following inventories does not have enough stocks left!',
+                'inssuficient_stocks' => $inssuficient_stocks,
+            ], 410);
+        }
+
+        DB::beginTransaction();
+        try {
+            //add basic treatment details
+            $treatment = new Treatment;
+            $treatment->service_id = $treatment_details->service_id;
+            $treatment->patient_id = $treatment_details->patient_id;
+            //$treatment->inventory_id = $treatment_details->inventory_id;
+            $treatment->user_id = $treatment_details->user_id;
+            $treatment->quantity = $treatment_details->quantity;
+            $treatment->discount = $treatment_details->discount;
+            $treatment->date = $treatment_details->date;
+            $treatment->save();
+
+            //get id of the treatment just created
+            $treatment_id = $treatment->id;
+
+
+
+            //add skus used in the treatment
+            foreach ($treatment_details->sku_usage as $sku) {
+                $sku_usage = new SkuUsage;
+                $sku_usage->sku_id = $sku['sku_id'];
+                $sku_usage->treatment_id = $treatment_id;
+                $sku_usage->description = $sku['description'];
+                $sku_usage->usage_date = $treatment->date;
+                $sku_usage->used_units = $sku['used_units'];
+
+                $sku_usage->save();
+
+                DB::table('inventory_treatment')->insert([
+                    'inventory_id' => $sku['inventory_id'],
+                    'treatment_id' => $treatment_id,
+                    'sku_id' => $sku['sku_id'],
+                ]);
+            }
+
+
+
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw new Exception($e->getMessage());
+        }
+        return response()->json([
+            'message' => 'Treatment added successfully!',
+
+        ], 201);
+    }
+
+    public static function getPatientTreatments($patient_id)
+    {
+
+        $treatment_details = Treatment::where('patient_id', $patient_id)->with('inventories.skus')->get();
+
+        return $treatment_details;
+    }
 
     public static function processTreatmentDetails($patient_id)
     {

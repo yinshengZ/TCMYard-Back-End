@@ -17,8 +17,12 @@ class Treatment extends Model
 
     public function inventories()
     {
-        return $this->belongsToMany('App\Models\Inventory')->withPivot('units')->withTimestamps();
+        return $this->belongsToMany('App\Models\Inventory')->withTimestamps();
     }
+
+    /*  public function inventories_pivot(){
+        return $this->hasMany('App\Models\Inventory','')
+    } */
 
 
     public function incomes()
@@ -31,7 +35,8 @@ class Treatment extends Model
         return $this->hasMany('App\Models\TreatmentDetails', 'id');
     }
 
-    public function patients(){
-        return $this->belongsTo('App\Models\Patient','patient_id');
+    public function patients()
+    {
+        return $this->belongsTo('App\Models\Patient', 'patient_id');
     }
 }
