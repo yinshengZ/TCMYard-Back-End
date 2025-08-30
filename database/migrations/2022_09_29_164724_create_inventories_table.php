@@ -18,10 +18,10 @@ class CreateInventoriesTable extends Migration
             $table->string('name');
             $table->string('eng_name');
             $table->text('description');
-            $table->double('stock',8,2);
             $table->unsignedBigInteger('categories_id');
-            $table->decimal('unit_price',$precision="9",$scale="2");
-            $table->date('expiry_date')->nullable();
+            $table->foreign('categories_id')->references('id')->on('inventory_categories');
+            // $table->decimal('unit_price', $precision = "9", $scale = "2");
+            //$table->date('expiry_date')->nullable();
             $table->softDeletes('deleted_at');
             $table->timestamps();
         });

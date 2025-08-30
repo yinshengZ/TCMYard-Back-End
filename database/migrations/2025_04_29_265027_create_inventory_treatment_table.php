@@ -17,11 +17,13 @@ class CreateInventoryTreatmentTable extends Migration
             $table->id();
             $table->foreignId('inventory_id');
             $table->foreignId('treatment_id');
-            $table->unsignedBigInteger('units');
+            $table->foreignid('sku_id');
+            //$table->unsignedBigInteger('units');
 
 
-            $table->foreign('inventory_id')->references('id')->on('inventories')->onDelete('cascade');
-            $table->foreign('treatment_id')->references('id')->on('treatments')->onDelete('cascade');
+            $table->foreign('inventory_id')->references('id')->on('inventories');
+            $table->foreign('treatment_id')->references('id')->on('treatments');
+            $table->foreign('sku_id')->references('id')->on('inventory_skus');
 
             $table->timestamps();
         });

@@ -180,12 +180,16 @@ class PatientStatController extends Controller
                     array_push($final_data, $gender_month_data);
                 }
             }
+            return response()->json([
+                'data' => $final_data,
+                'code' => 200
+            ]);
+        } else {
+            return response()->json([
+                'data' => 'No Data!',
+                'code' => 200
+            ]);
         }
-
-        return response()->json([
-            'data' => $final_data,
-            'code' => 200
-        ]);
     }
 
     public function get_patients_genders_list_by_year($year)
@@ -198,6 +202,21 @@ class PatientStatController extends Controller
             ->get();
         return response()->json([
             'data' => $genders_list,
+            'code' => 200
+        ]);
+    }
+
+    public function get_yearly_patients_count_by_gender($gender_id)
+    {
+        $patients = Patient::select('gender_id', DB::raw('count(*) as total'), DB::raw('Year(date_joined) as year'))
+            ->where('gender_id', $gender_id)
+            ->groupBy('year')
+            ->orderBy('year', 'DESC')
+            ->with('gender:id,gender')
+            ->get();
+        //TODO: add chart data
+        return response()->json([
+            'data' => $patients,
             'code' => 200
         ]);
     }

@@ -60,28 +60,83 @@ class InventoryService
         return true;
     }
 
-    public static function refundStocks($id)
+    /**
+     * refund stocks
+     * @param $treatment_id
+     * @return bool
+     * 
+     */
+    public static function refundStocks($treatment_id)
     {
-        try {
-            $treatment_details = Treatment::select('id', 'quantity',)->where('id', $id)->with('inventories')->first();
-            $quantity = $treatment_details->quantity;
+       
+        //TODO:: implement refundStocks
+        $treatment_details = Treatment::select('id', 'quantity',)->where('id', $treatment_id)->with('inventories')->first();
+    }
 
-            $inventories = $treatment_details->inventories;
-            foreach ($inventories as $inventory) {
-                Inventory::select('id', 'stock')->where('id', $inventory->id)->increment('stock', $inventory['pivot']['units'] * $quantity);
+    public static function checkStocks($service_id, $stocks_to_check, $quantity)
+    {
+        //print_r($stocks_to_check);
+        //int_r($stocks_to_check);
+
+
+
+
+        //final array to return 
+        $final_details = [];
+
+        //stocks checked
+        $final_stocks = new stdClass();
+
+        $enough_stocks = true;
+
+        if ($service_id == 2) {
+            //have to assign the property first, cant return as $final_stocks->enough_stocks = true; it will return 1 without the object.
+            $final_stocks->enough_stocks = $enough_stocks;
+            return $final_stocks;
+        } else {
+            foreach ($stocks_to_check as $index => $stock) {
+                $stock_check_details = new stdClass();
+                $stock_id = $stock['sku_id'];
+
+                $stock_units = self::getStocksBySkuId($stock_id);
+
+
+                if ($stock_units->remaining_sku_stock <= 0 || $stock_units->remaining_sku_stock < $stock['used_units'] * $quantity) {
+                    $stock_check_details->sku_id = $stock_id;
+                    $stock_check_details->sku_name = $stock_units->sku_name;
+                    $stock_check_details->sku_description = $stock_units->sku_description;
+                    $stock_check_details->remaining_sku_stock = $stock_units->remaining_sku_stock;
+                    $stock_check_details->enough_stocks = false;
+                    $final_details[$index] = $stock_check_details;
+                    $enough_stocks = false;
+                } else {
+                    $stock_check_details->sku_id = $stock_id;
+                    $stock_check_details->sku_name = $stock_units->sku_name;
+                    $stock_check_details->sku_description = $stock_units->sku_description;
+                    $stock_check_details->remaining_sku_stock = $stock_units->remaining_sku_stock;
+                    $stock_check_details->enough_stocks = true;
+                    $final_details[$index] = $stock_check_details;
+                }
             }
-            return true;
-        } catch (Exception $exception) {
-            return $exception;
+
+
+            $final_stocks->stock_check_details = $final_details;
+            $final_stocks->enough_stocks = $enough_stocks;
+            return $final_stocks;
         }
     }
 
 
     //get requested stocks 
-    public static function getStocks($id)
+    public static function getStocksByInventoryId($id)
     {
 
-        $used_units = 0;
+
+        $total_used_units = 0;
+        $remaining_inventory_stock = 0;
+
+
+        $stock_info = new stdClass();
 
         //get all skus of the inventory
         //$skus = SKU::select('id', 'units', 'name', 'description')->where('inventory_id', $id)->get();
@@ -100,11 +155,36 @@ class InventoryService
         //get remaining stocks
         $remaining_stocks = $stocks - $used_units;
 
-        return $remaining_stocks;
+        $stock_info->$remaining_inventory_stock = $remaining_stocks;
+
+        return $remaining_inventory_stock;
+    }
+
+
+    public static function getStocksBySkuId($id)
+    {
+
+        $stock_details = new stdClass();
+        $sku_name = '';
+        $sku_description = '';
+
+        //get all skus of the inventory
+        $stocks = SKU::select('units', 'name', 'description')->where('id', $id)->first();
+
+
+        $usages = SkuUsage::select('used_units')->where('sku_id', $id)->sum('used_units');
+
+        $remaining_sku_stock = $stocks->units - doubleval($usages);
+        if ($remaining_sku_stock < 0) {
+            $remaining_sku_stock = 0;
+        }
+        $stock_details->sku_name = $stocks->name;
+        $stock_details->sku_description = $stocks->description;
+        $stock_details->remaining_sku_stock = $remaining_sku_stock;
+        $stock_details->sku_id = $id;
 
 
 
-
-        //return $stock;
+        return $stock_details;
     }
 }

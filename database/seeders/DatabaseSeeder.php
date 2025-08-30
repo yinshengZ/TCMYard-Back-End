@@ -21,8 +21,8 @@ class DatabaseSeeder extends Seeder
             Inventory_Categories_Seeder::class,
             PaymentTypeSeeder::class,
             InventorySeeder::class,
-            IncomeSeeder::class,
-            ExpenseSeeder::class,
+            //IncomeSeeder::class,
+            //ExpenseSeeder::class,
 
         ]);
     }
